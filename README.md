@@ -1,28 +1,31 @@
 # Pstack ports
 
 Pstack's 52 engineering skills and 23 playbooks, packaged for
-[Antigravity](antigravity/README.md) and [OpenCode 1.14.30](opencode/README.md).
-Each port adds a harness adapter and six native agent roles. No dependencies
+[Amp](pstack/README.md), [Antigravity](antigravity/README.md), and
+[OpenCode 1.14.30](opencode/README.md). Each port adds a harness adapter;
+Antigravity and OpenCode also add six native agent roles. No package dependencies
 are needed to build or load these ports. Bundled helper scripts have their own
 runtime dependencies.
 
-The existing Amp port remains in [amp-plugins](https://github.com/dinhtungdu/amp-plugins/tree/main/pstack).
-This repository does not change or replace that installation.
+The Amp bundle preserves the existing [amp-plugins port](https://github.com/dinhtungdu/amp-plugins/tree/main/pstack)
+and its `pstack:*` namespace. Publishing this copy does not update that installation.
 
 ## Install a port
 
 Clone this repository, then follow the port's README:
 
+- [Install Amp](pstack/README.md): native directory plugin, named `pstack`.
 - [Install Antigravity](antigravity/README.md): native directory plugin.
 - [Install OpenCode](opencode/README.md): native JavaScript config-hook plugin.
 
-Nothing installs globally or loads a workflow automatically. Existing user
-permissions remain authoritative. Cursor setup, webhook automation, and model
-configuration do not execute in either port.
+Nothing installs globally on its own. Amp requests workflow loading only in the
+WooCommerce and Gutenberg repositories documented in its README; the other ports
+remain on demand. Existing user permissions remain authoritative. Cursor setup,
+webhook automation, and Cursor model configuration do not execute in any port.
 
 ## Build and verify
 
-Use Node 22 or newer. From this repository root:
+Use Node 22 or newer and Bun for the Amp tests. From this repository root:
 
 ```sh
 npm run build
@@ -30,11 +33,13 @@ npm test
 npm run lint
 ```
 
-Edit `antigravity/ADAPTER.md`, `opencode/ADAPTER.md`, or `agents.json`, then rebuild.
+Edit `pstack/AMP.md`, `antigravity/ADAPTER.md`, `opencode/ADAPTER.md`, or `agents.json`, then rebuild.
 Do not edit generated skills or generated agent definitions. Tests verify body
 hashes, complete resources, model inheritance, and preservation of user settings.
+Amp keeps its existing registration hook and worker briefing templates, not the
+six native agent definitions used by the other ports.
 
-`upstream/` is the maintained source. The build makes two self-contained bundles,
+`upstream/` is the maintained source. The build makes three self-contained bundles,
 without symlinks or runtime access to `upstream/`. Keeping a single runtime shared
 directory was rejected because copying an Antigravity plugin must not break it.
 The OpenCode plugin adds a skills path and agents in memory instead of copying

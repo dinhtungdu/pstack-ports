@@ -44,9 +44,10 @@ if (process.argv[2]) {
 
 const roles = JSON.parse(await readFile(resolve(root, 'agents.json'), 'utf8'))
 const commentSicko = splitSkill(await readFile(resolve(root, 'upstream/comment-sicko.md'), 'utf8')).body.trimEnd()
-for (const harness of ['antigravity', 'opencode']) {
+for (const harness of ['antigravity', 'opencode', 'pstack']) {
   const dest = resolve(root, harness)
-  const adapter = await readFile(resolve(dest, 'ADAPTER.md'), 'utf8')
+  const isAmp = harness === 'pstack'
+  const adapter = await readFile(resolve(dest, isAmp ? 'AMP.md' : 'ADAPTER.md'), 'utf8')
   await rm(resolve(dest, 'skills'), { recursive: true, force: true })
   await cp(resolve(root, 'upstream/skills'), resolve(dest, 'skills'), { recursive: true })
   for (const name of names) {
@@ -58,13 +59,14 @@ for (const harness of ['antigravity', 'opencode']) {
     const description = header.match(/^description: (.+)$/m)?.[1]
     if (!description) throw new Error(`Missing description: ${name}`)
     const metadata = harness === 'opencode' ? '\nmetadata:\n  opencode/slash: "true"' : ''
-    const preface = `**${harness === 'opencode' ? 'OpenCode' : 'Antigravity'} port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.\n\n`
-    await writeFile(resolve(base, 'SKILL.md'), `---\nname: ${name}\ndescription: ${description}${metadata}\n---\n\n${preface}${body}`)
-    await writeFile(resolve(base, 'harness-adapter.md'), adapter)
+    const preface = isAmp ? ampPreface : `**${harness === 'opencode' ? 'OpenCode' : 'Antigravity'} port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.\n\n`
+    await writeFile(resolve(base, 'SKILL.md'), `---\n${isAmp ? header : `name: ${name}\ndescription: ${description}${metadata}`}\n---\n\n${preface}${body}`)
+    await writeFile(resolve(base, isAmp ? 'amp-adapter.md' : 'harness-adapter.md'), adapter)
   }
   for (const resource of ['LICENSE', 'docs', 'assets']) {
     await cp(resolve(root, 'upstream', resource), resolve(dest, resource), { recursive: true })
   }
+  if (isAmp) continue
   await rm(resolve(dest, 'agents'), { recursive: true, force: true })
   await mkdir(resolve(dest, 'agents'), { recursive: true })
   const definitions = {}
@@ -100,4 +102,4 @@ for (const harness of ['antigravity', 'opencode']) {
     await writeFile(resolve(dest, 'model-routing.defaults.json'), `${JSON.stringify(defaults, null, 2)}\n`)
   }
 }
-console.log(`Built ${names.length} skills and ${Object.keys(roles).length} agents for each harness`)
+console.log(`Built ${names.length} skills for Amp, Antigravity, and OpenCode; ${Object.keys(roles).length} native agents each for Antigravity and OpenCode`)
