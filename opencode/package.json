@@ -1,0 +1,9 @@
+{
+  "name": "pstack-opencode",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./index.js",
+  "files": ["index.js", "agents.json", "skills", "docs", "assets", "ADAPTER.md", "README.md", "LICENSE"],
+  "license": "MIT"
+}

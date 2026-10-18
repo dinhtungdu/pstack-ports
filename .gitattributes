@@ -1,0 +1,4 @@
+# Preserve this pinned upstream body's extra final newline byte-for-byte.
+upstream/skills/automate-me/SKILL.md whitespace=-blank-at-eof
+antigravity/skills/automate-me/SKILL.md whitespace=-blank-at-eof
+opencode/skills/automate-me/SKILL.md whitespace=-blank-at-eof
