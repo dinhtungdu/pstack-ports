@@ -7,9 +7,6 @@ Antigravity and OpenCode also add six native agent roles. No package dependencie
 are needed to build or load these ports. Bundled helper scripts have their own
 runtime dependencies.
 
-The Amp bundle preserves the existing [amp-plugins port](https://github.com/dinhtungdu/amp-plugins/tree/main/pstack)
-and its `pstack:*` namespace. Publishing this copy does not update that installation.
-
 ## Install a port
 
 Clone this repository, then follow the port's README:
@@ -18,9 +15,8 @@ Clone this repository, then follow the port's README:
 - [Install Antigravity](antigravity/README.md): native directory plugin.
 - [Install OpenCode](opencode/README.md): native JavaScript config-hook plugin.
 
-Nothing installs globally on its own. Amp requests workflow loading only in the
-WooCommerce and Gutenberg repositories documented in its README; the other ports
-remain on demand. Existing user permissions remain authoritative. Cursor setup,
+Nothing installs globally on its own. All ports load workflows on demand,
+without project-specific behavior. Existing user permissions remain authoritative. Cursor setup,
 webhook automation, and Cursor model configuration do not execute in any port.
 
 ## Build and verify
@@ -36,7 +32,7 @@ npm run lint
 Edit `pstack/AMP.md`, `antigravity/ADAPTER.md`, `opencode/ADAPTER.md`, or `agents.json`, then rebuild.
 Do not edit generated skills or generated agent definitions. Tests verify body
 hashes, complete resources, model inheritance, and preservation of user settings.
-Amp keeps its existing registration hook and worker briefing templates, not the
+Amp registers skills and includes worker briefing templates, not the
 six native agent definitions used by the other ports.
 
 `upstream/` is the maintained source. The build makes three self-contained bundles,

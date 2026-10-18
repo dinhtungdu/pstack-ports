@@ -2,11 +2,8 @@
 
 An Amp directory plugin containing pstack's engineering workflows and principles.
 It registers 52 qualified skills, including `pstack:poteto-mode`, `pstack:architect`,
-`pstack:interrogate`, and `pstack:swarm`. Automatic loading is on for the
-WooCommerce monorepo and Gutenberg. An `agent.start` hook asks the agent to load `pstack:poteto-mode`
-before each task unless already loaded, respecting explicit user opt-outs.
-Other skills and playbooks remain on demand.
-It adds no tools or services. The hook supplies instructions, not enforcement.
+`pstack:interrogate`, and `pstack:swarm`. All skills and playbooks load on demand.
+It adds no tools, hooks, services, or project-specific behavior.
 
 ## Use the port
 
@@ -26,20 +23,8 @@ Antigravity or OpenCode bundles into an Amp plugins repository.
 Keep the directory named `pstack`: it determines the `pstack:*` skill namespace.
 Start a new thread or reload plugins after installation. Publishing this GitHub
 repository alone does not install or update the plugin. Skills remain available
-for manual loading everywhere. Auto-loading uses a hard-coded GitHub repository list:
-
-- `woocommerce/woocommerce` and `dinhtungdu/woocommerce`
-- `WordPress/gutenberg` and `dinhtungdu/gutenberg`
-
-Any matching Git remote, including `upstream`, enables it. HTTPS and SSH remotes
-are supported. Worktrees use their active workspace path. Other repositories,
-including standalone WooCommerce plugins, remain manual-only.
-
-There are no palette commands or saved-setting checks. Old `pstack.autoLoad`
-settings are ignored. The same repository rule runs on Mac, Lima, and orbs;
-no local configuration or synchronization is needed. Already-loaded instructions
-remain in a thread even if its repository changes.
-Ask for `pstack:poteto-help` for guidance, or explicitly opt out for a task or thread.
+for manual loading everywhere. Ask for `pstack:poteto-mode` to use the workflow
+or `pstack:poteto-help` for guidance.
 
 Existing bare skills such as `architect` are separate installations. This plugin
 does not overwrite them. Use `pstack:*` names to select this copy.
