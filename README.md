@@ -2,7 +2,7 @@
 
 Pstack's 52 engineering skills and 23 playbooks, packaged for
 [Amp](pstack/README.md), [Antigravity](antigravity/README.md), and
-[OpenCode 1.14.30](opencode/README.md). Each port adds a harness adapter;
+[OpenCode V2](opencode/README.md). Each port adds a harness adapter;
 Antigravity and OpenCode also add six native agent roles. No package dependencies
 are needed to build or load these ports. Bundled helper scripts have their own
 runtime dependencies.
@@ -13,7 +13,7 @@ Clone this repository, then follow the port's README:
 
 - [Install Amp](pstack/README.md): native directory plugin, named `pstack`.
 - [Install Antigravity](antigravity/README.md): native directory plugin.
-- [Install OpenCode](opencode/README.md): native JavaScript config-hook plugin.
+- [Install OpenCode](opencode/README.md): native V2 JavaScript setup/transform plugin.
 
 Nothing installs globally on its own. All ports load workflows on demand,
 without project-specific behavior. Existing user permissions remain authoritative. Cursor setup,
@@ -38,8 +38,8 @@ six native agent definitions used by the other ports.
 `upstream/` is the maintained source. The build makes three self-contained bundles,
 without symlinks or runtime access to `upstream/`. Keeping a single runtime shared
 directory was rejected because copying an Antigravity plugin must not break it.
-The OpenCode plugin adds a skills path and agents in memory instead of copying
-files into the user's configuration directory.
+The OpenCode plugin registers skills and agents in memory instead of copying
+files into the user's configuration directory. V1 is not supported.
 
 To reimport the pinned version from a reviewed Cursor or Amp pstack checkout:
 
@@ -62,22 +62,23 @@ The skill bodies remain verbatim. Resources include that port's script safety
 adaptations. The original guide describes Cursor; use each port's README and
 adapter for installation and harness behavior. MIT attribution is retained.
 
-Guidelines consulted on 2026-10-17:
+Guidelines consulted on 2026-10-19:
 
 - Antigravity: [plugins](https://antigravity.google/docs/plugins),
   [skills](https://antigravity.google/docs/skills), and
   [custom subagents](https://antigravity.google/docs/subagents).
-- OpenCode: [plugins](https://opencode.ai/docs/plugins/),
-  [skills](https://opencode.ai/docs/skills/), and
-  [agents](https://opencode.ai/docs/agents/).
-- Version-specific OpenCode contracts: [plugin initialization](https://github.com/anomalyco/opencode/blob/v1.14.30/packages/opencode/src/plugin/index.ts),
-  [skill discovery](https://github.com/anomalyco/opencode/blob/v1.14.30/packages/opencode/src/skill/index.ts),
-  [agent configuration](https://github.com/anomalyco/opencode/blob/v1.14.30/packages/opencode/src/agent/agent.ts),
-  and [task parameters](https://github.com/anomalyco/opencode/blob/v1.14.30/packages/opencode/src/tool/task.ts).
+- OpenCode: [V2 documentation](https://opencode.ai/v2/docs/).
+- OpenCode V2 2.0.32 contracts: [plugin definition](https://github.com/anomalyco/opencode/blob/815de9950b205cd734c9962c4629b07d3b83ee07/packages/plugin/src/promise/plugin.ts),
+  [skill registration](https://github.com/anomalyco/opencode/blob/815de9950b205cd734c9962c4629b07d3b83ee07/packages/plugin/src/promise/skill.ts),
+  [agent configuration](https://github.com/anomalyco/opencode/blob/815de9950b205cd734c9962c4629b07d3b83ee07/packages/core/src/config/plugin/agent.ts),
+  and [subagent parameters](https://github.com/anomalyco/opencode/blob/815de9950b205cd734c9962c4629b07d3b83ee07/packages/core/src/tool/plugin/subagent.ts).
 
 Antigravity CLI 1.4.1 passes strict plugin validation and discovers all 52 skills
 and six agents after an isolated native install. Its validator also accepts
 installed agents after applying flash and pro routing settings. These checks
-do not invoke a model or prove App delegation. OpenCode model calls and paid
-provider routing also remain unverified. Configuration checks alone do not
-prove model-driven workflows.
+do not invoke a model or prove App delegation. OpenCode V2 2.0.32 loads all
+52 skills and six agents in an isolated server. Its native configuration keeps
+model, variant, system prompt, disabled-agent, and permission overrides.
+Run this check with `OPENCODE_V2_BIN=/absolute/path/to/v2/opencode npm test`.
+OpenCode model calls and paid provider routing remain unverified.
+Configuration checks alone do not prove model-driven workflows.

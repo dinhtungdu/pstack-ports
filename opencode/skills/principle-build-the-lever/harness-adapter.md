@@ -1,9 +1,9 @@
-# Pstack on OpenCode 1.14.30
+# Pstack on OpenCode V2
 
 This adapter replaces Cursor-specific mechanics in the unchanged skills and
 playbooks. Preserve engineering checks, not Cursor API names. The active tool
 schemas, permissions, and user instructions take precedence. This plugin targets
-the 1.14.30 config-hook API, not OpenCode's incompatible development-branch API.
+the V2 setup/transform API, verified against 2.0.32. V1 is not supported.
 
 ## Skills and resources
 
@@ -13,7 +13,7 @@ can collide with independently installed skills. Resolve references against the
 loaded skill directory, never against the target project's working directory.
 Use native file reads for sibling resources. Pass the absolute poteto-mode
 skill path to every delegate. A slash invocation means a skill, not a shell
-command. Native slash exposure varies by OpenCode version; use skill when absent.
+command. Use the native skill tool when a slash entry is unavailable.
 
 The 52 skill bodies and 23 playbooks are preserved. Cursor setup-pstack,
 make-bot-ui, Benny automation, Custom Modes, and team-kit are excluded.
@@ -24,11 +24,13 @@ real before/after proof. A mock or compile is not proof.
 
 ## Delegation and model routing
 
-Use the native task tool with description, prompt, and subagent_type. task_id
+Use the native subagent tool with agent, description, and prompt. sessionID
 resumes an existing child only when its retained local state is necessary.
-Cursor model, readonly, run_in_background, resume, environment, and
-file_attachments fields are not task parameters. There is no per-call model
-override. Use a fresh child for new work and the following installed agent names:
+background returns immediately and notifies the parent on completion. model is
+an optional per-call override; use it only when the user explicitly requests a
+model or variant. Cursor readonly, run_in_background, resume, environment, and
+file_attachments fields are not subagent parameters. Use a fresh child for new
+work and the following installed agent names:
 
 - poteto-agent: implementation, refactoring, hillclimb, and swarm workers.
 - comment-sicko: no-comments review, report only.
@@ -37,11 +39,11 @@ override. Use a fresh child for new work and the following installed agent names
 - pstack-reviewer-alt: another independent review seat.
 - pstack-synthesizer: how, why, and reflect synthesis.
 
-Configure models through OpenCode's native agent.<name>.model setting using
-provider/model IDs from opencode models. The plugin preserves user overrides,
-including model, prompt, variant, disable, and permissions. Without a model
-override, a child inherits the invoking parent's model. pstack-models.mdc and
-Cursor model tables do not configure OpenCode. Never translate Cursor slugs or
+Configure models through OpenCode's native agents.<name>.model setting using
+provider/model#variant IDs. Native configuration applies after plugin defaults,
+preserving model, system, disabled, and permissions overrides. Without a tool or
+agent model override, a child inherits the invoking parent's model.
+pstack-models.mdc and Cursor model tables do not configure OpenCode. Never translate Cursor slugs or
 silently choose a paid model. An unavailable model is a configuration error to
 report, not permission to pick a different provider.
 
@@ -52,25 +54,25 @@ their assignments. Default reviewers share the parent model. Report that gap;
 never label a same-model panel multi-model. Preserve an incomplete gate when
 the workflow requires unavailable independence.
 
-task awaits a child result. Calls may run concurrently only when the native
-harness actually dispatches them together. Do not promise asynchronous messaging
-or Cursor cloud agents. Children share the project working directory by default.
+subagent awaits a child result unless background is true. Calls may run
+concurrently only when the native harness actually dispatches them together.
+Completion notifications are not arbitrary asynchronous messaging or Cursor
+cloud agents. Children share the project working directory by default.
 Keep writes disjoint or create real isolated worktrees with a supported workflow.
 A path in a prompt alone does not prove worktree isolation. Supply exact code,
 context, paths, success criteria, and evidence requirements. Review every result.
 
-Nested task and todo tools can be disabled in children by OpenCode. Do not widen
-permissions to force nesting. The parent runs additional phases when needed.
-Report-only agents default to edit: deny. Shell and MCP permissions still come
-from user configuration, so report-only scope also forbids mutating shell and
+OpenCode limits subagent nesting (default depth: one). Do not widen permissions
+or depth settings to force nesting. The parent runs additional phases when needed.
+Report-only agents default to a deny rule for action edit on resource *.
+Shell and MCP permissions still come from user configuration, so report-only scope also forbids mutating shell and
 MCP calls. This is not a read-only filesystem sandbox.
 
 ## History, authorization, and lifecycle
 
 Use the current conversation for current-session evidence. For authorized older
-sessions, use opencode session list and opencode export with the exact session
-ID, or supported session APIs. Do not run Cursor transcript globs or scan other
-projects. Give reviewers a scoped digest if raw history is unavailable, and
+sessions, use supported V2 session APIs with the exact session ID. Do not run
+Cursor transcript globs or scan other projects. Give reviewers a scoped digest if raw history is unavailable, and
 identify tool-level claims that cannot be verified. Use only installed tools
 and configured MCP servers. Do not assume a read-only role loses all MCP access.
 
@@ -81,9 +83,9 @@ approval before skill edits. Preserve unrelated changes and explicit draft PRs.
 Do not reset another actor's work to make a playbook convenient.
 
 Cursor /loop is not available. Use a supported watcher only when the user asks
-for monitoring or scheduling. Otherwise continue with ordinary task waits and
+for monitoring or scheduling. Otherwise continue with ordinary subagent waits and
 report the stopping point. The plugin starts no process or service, writes no
-configuration files, and does not auto-load poteto-mode. Use native todowrite
+configuration files, and does not auto-load poteto-mode. Use native todo
 when available, otherwise a Markdown task list.
 
 ## Bundled scripts

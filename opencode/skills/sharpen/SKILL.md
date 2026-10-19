@@ -1,8 +1,6 @@
 ---
 name: sharpen
 description: "Sharpen a task before starting: the expert approach, what the user is really after, and the right level of specification. Use for /sharpen."
-metadata:
-  opencode/slash: "true"
 ---
 
 **OpenCode port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.

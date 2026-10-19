@@ -50,6 +50,7 @@ for (const harness of ['antigravity', 'opencode', 'pstack']) {
   const adapter = await readFile(resolve(dest, isAmp ? 'AMP.md' : 'ADAPTER.md'), 'utf8')
   await rm(resolve(dest, 'skills'), { recursive: true, force: true })
   await cp(resolve(root, 'upstream/skills'), resolve(dest, 'skills'), { recursive: true })
+  const skillDescriptions = {}
   for (const name of names) {
     const base = resolve(dest, 'skills', name)
     const { header, body } = splitSkill(await readFile(resolve(base, 'SKILL.md'), 'utf8'))
@@ -58,9 +59,9 @@ for (const harness of ['antigravity', 'opencode', 'pstack']) {
     }
     const description = header.match(/^description: (.+)$/m)?.[1]
     if (!description) throw new Error(`Missing description: ${name}`)
-    const metadata = harness === 'opencode' ? '\nmetadata:\n  opencode/slash: "true"' : ''
+    skillDescriptions[name] = description.startsWith('"') ? JSON.parse(description) : description
     const preface = isAmp ? ampPreface : `**${harness === 'opencode' ? 'OpenCode' : 'Antigravity'} port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.\n\n`
-    await writeFile(resolve(base, 'SKILL.md'), `---\n${isAmp ? header : `name: ${name}\ndescription: ${description}${metadata}`}\n---\n\n${preface}${body}`)
+    await writeFile(resolve(base, 'SKILL.md'), `---\n${isAmp ? header : `name: ${name}\ndescription: ${description}`}\n---\n\n${preface}${body}`)
     await writeFile(resolve(base, isAmp ? 'amp-adapter.md' : 'harness-adapter.md'), adapter)
   }
   for (const resource of ['LICENSE', 'docs', 'assets']) {
@@ -75,8 +76,8 @@ for (const harness of ['antigravity', 'opencode', 'pstack']) {
     definitions[name] = {
       description: role.description,
       mode: 'subagent',
-      prompt,
-      ...(role.reportOnly ? { permission: { edit: 'deny' } } : {}),
+      system: prompt,
+      ...(role.reportOnly ? { permissions: [{ action: 'edit', resource: '*', effect: 'deny' }] } : {}),
     }
     if (harness === 'antigravity') {
       const tools = ['view_file', 'grep_search', 'run_command']
@@ -96,6 +97,7 @@ for (const harness of ['antigravity', 'opencode', 'pstack']) {
   }
   if (harness === 'opencode') {
     await writeFile(resolve(dest, 'agents.json'), `${JSON.stringify(definitions, null, 2)}\n`)
+    await writeFile(resolve(dest, 'skills.json'), `${JSON.stringify(skillDescriptions, null, 2)}\n`)
     await rm(resolve(dest, 'agents'), { recursive: true })
   } else {
     const defaults = Object.fromEntries(Object.keys(roles).map(name => [name, 'inherit']))

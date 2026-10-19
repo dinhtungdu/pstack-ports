@@ -1,8 +1,6 @@
 ---
 name: unslop
 description: Cut AI tells from any writing.
-metadata:
-  opencode/slash: "true"
 ---
 
 **OpenCode port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.

@@ -1,11 +1,11 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
-import { cp, mkdir, mkdtemp, open, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises'
-import { spawnSync } from 'node:child_process'
+import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises'
+import { spawn, spawnSync } from 'node:child_process'
 import { resolve } from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
-import { PstackPlugin } from '../opencode/index.js'
+import { fileURLToPath } from 'node:url'
+import PstackPlugin from '../opencode/index.js'
 
 const root = fileURLToPath(new URL('../', import.meta.url))
 const read = path => readFile(resolve(root, path), 'utf8')
@@ -133,34 +133,34 @@ test('Antigravity settings default to inherit, survive reinstall, and change onl
   }
 })
 
-test('OpenCode registers inherited-model agents without replacing unrelated configuration', async () => {
-  const { config: configure } = await PstackPlugin()
-  const config = { skills: { paths: ['/existing'], urls: ['https://example.com/skills'] }, agent: { existing: { model: 'local/existing' } } }
-  await configure(config)
-  await configure(config)
-  assert.deepEqual(config.skills, { paths: ['/existing', resolve(root, 'opencode/skills') + '/'], urls: ['https://example.com/skills'] })
-  assert.deepEqual(config.agent.existing, { model: 'local/existing' })
+test('OpenCode V2 registers complete skills and inherited-model subagents', async () => {
+  const skills = new Map()
+  const agents = new Map()
+  assert.equal(PstackPlugin.id, 'pstack')
+  await PstackPlugin.setup({
+    skill: { transform: async transform => transform({ add: skill => skills.set(skill.id, skill) }) },
+    agent: { transform: async transform => transform({ update: (id, update) => {
+      const agent = { permissions: [] }
+      update(agent)
+      agents.set(id, agent)
+    } }) },
+  })
+  assert.deepEqual([...skills.keys()].sort(), names)
+  for (const [id, skill] of skills) {
+    assert.equal(skill.path, resolve(root, 'opencode/skills', id, 'SKILL.md'))
+    const text = await read(`opencode/skills/${id}/SKILL.md`)
+    assert.equal(skill.content, text.slice(text.indexOf('\n---\n') + 5))
+    assert.ok(skill.description.length > 0)
+  }
+  assert.match(skills.get('how').description, /^Use for "how does X work"/)
+  assert.equal(agents.size, 6)
   for (const [name, role] of Object.entries(roles)) {
-    assert.equal(config.agent[name].mode, 'subagent')
-    assert.equal(config.agent[name].model, undefined)
-    assert.equal(config.agent[name].permission.edit, role.reportOnly ? 'deny' : undefined)
+    const agent = agents.get(name)
+    assert.equal(agent.mode, 'subagent')
+    assert.equal(agent.model, undefined)
+    assert.ok(agent.system.includes(role.prompt))
+    assert.deepEqual(agent.permissions, role.reportOnly ? [{ action: 'edit', resource: '*', effect: 'deny' }] : [])
   }
-})
-
-test('OpenCode preserves user model, disable, prompt, and nested permission overrides', async () => {
-  const { config: configure } = await PstackPlugin()
-  const override = {
-    model: 'local/reviewer-b',
-    variant: 'high',
-    prompt: 'User-owned instructions',
-    disable: true,
-    permission: { edit: { '*': 'deny', '*.md': 'ask' }, bash: { '*': 'deny', 'git diff*': 'allow' } },
-  }
-  const config = { agent: { 'pstack-reviewer': structuredClone(override), 'pstack-reviewer-alt': { permission: 'deny' } } }
-  await configure(config)
-  assert.deepEqual(config.agent['pstack-reviewer'], { description: roles['pstack-reviewer'].description, mode: 'subagent', ...override })
-  assert.equal(config.agent['pstack-reviewer-alt'].permission, 'deny')
-  assert.equal(config.agent['pstack-researcher'].permission.edit, 'deny')
 })
 
 const agyVersion = spawnSync('agy', ['--version'], { encoding: 'utf8' })
@@ -205,52 +205,106 @@ test('agy validates, installs, discovers, and accepts routing on an isolated nat
   }
 })
 
-const version = spawnSync('opencode', ['--version'], { encoding: 'utf8' })
-test('OpenCode 1.14.30 discovers all bundled skills and custom agents through its real loader', {
-  skip: version.status !== 0 || version.stdout.trim() !== '1.14.30' ? 'Requires opencode 1.14.30' : false,
+const opencode = process.env.OPENCODE_V2_BIN ?? 'opencode2'
+const version = spawnSync(opencode, ['--version'], { encoding: 'utf8', timeout: 10000 })
+test('OpenCode V2 discovers the bundle and applies native user overrides through its real loader', {
+  skip: !process.env.OPENCODE_V2_BIN && version.error?.code === 'ENOENT' ? 'Requires opencode2 or OPENCODE_V2_BIN' : false,
 }, async () => {
+  assert.equal(version.status, 0, version.error?.message ?? version.stderr)
+  assert.match(version.stdout, /\b(?:v)?2\./)
   await mkdir(resolve(root, '.amp/in'), { recursive: true })
   const scratch = await mkdtemp(resolve(root, '.amp/in/opencode-test-'))
+  let server
   try {
     const env = {
       ...process.env,
       HOME: resolve(scratch, 'home'),
+      OPENCODE_TEST_HOME: resolve(scratch, 'home'),
       XDG_CONFIG_HOME: resolve(scratch, 'config'),
       XDG_DATA_HOME: resolve(scratch, 'data'),
       XDG_STATE_HOME: resolve(scratch, 'state'),
       XDG_CACHE_HOME: resolve(scratch, 'cache'),
-      OPENCODE_DISABLE_EXTERNAL_SKILLS: 'true',
+      OPENCODE_DISABLE_PROJECT_CONFIG: 'true',
+      OPENCODE_DISABLE_MODELS_FETCH: 'true',
       OPENCODE_CONFIG_DIR: resolve(scratch, 'config/opencode'),
-      OPENCODE_CONFIG_CONTENT: JSON.stringify({ plugin: [pathToFileURL(resolve(root, 'opencode/index.js')).href] }),
+      OPENCODE_CONFIG_CONTENT: '{}',
+      OPENCODE_SERVER_PASSWORD: 'pstack-isolated-test',
     }
     await mkdir(env.HOME, { recursive: true })
-    const run = async args => {
-      const path = resolve(scratch, 'output.json')
-      const output = await open(path, 'w')
-      try {
-        // This CLI exits before large piped stdout finishes flushing.
-        const result = spawnSync('opencode', args, { cwd: scratch, env, encoding: 'utf8', timeout: 60000, stdio: ['ignore', output.fd, 'pipe'] })
-        assert.equal(result.status, 0, `${args.join(' ')}: ${result.error ?? result.stderr}`)
-      } finally {
-        await output.close()
+    await mkdir(env.OPENCODE_CONFIG_DIR, { recursive: true })
+    const configPath = resolve(env.OPENCODE_CONFIG_DIR, 'opencode.json')
+    const config = { plugins: [resolve(root, 'opencode')] }
+    await writeFile(configPath, JSON.stringify(config))
+    server = spawn(opencode, ['serve', '--hostname', '127.0.0.1', '--port', '0'], { cwd: scratch, env, stdio: ['ignore', 'pipe', 'pipe'] })
+    let logs = ''
+    server.stdout.on('data', data => { logs += data })
+    server.stderr.on('data', data => { logs += data })
+    const waitFor = async read => {
+      const deadline = Date.now() + 30000
+      while (Date.now() < deadline) {
+        assert.equal(server.exitCode, null, logs)
+        const value = await read()
+        if (value) return value
+        await new Promise(resolve => setTimeout(resolve, 100))
       }
-      return readFile(path, 'utf8')
+      assert.fail(`Timed out waiting for V2 loader: ${logs}`)
     }
-    const skills = JSON.parse(await run(['debug', 'skill']))
-    const bundled = skills.filter(skill => skill.location.startsWith(resolve(root, 'opencode/skills') + '/'))
+    const url = await waitFor(() => logs.match(/server listening on (http:\/\/\S+)/)?.[1])
+    const request = async (resource, method = 'GET') => {
+      const query = new URLSearchParams({ 'location[directory]': scratch })
+      const response = await fetch(`${url}/api/${resource}?${query}`, {
+        method,
+        headers: { Authorization: `Basic ${Buffer.from(`opencode:${env.OPENCODE_SERVER_PASSWORD}`).toString('base64')}` },
+        signal: AbortSignal.timeout(30000),
+      })
+      assert.equal(response.ok, true, await response.clone().text())
+      return response.status === 204 ? undefined : (await response.json()).data
+    }
+    const ready = () => waitFor(async () => {
+      const plugins = await request('plugin')
+      for (const id of ['pstack', 'opencode.config.agent', 'opencode.config.skill']) {
+        const plugin = plugins.find(plugin => plugin.id === id)
+        assert.notEqual(plugin?.state.status, 'error', JSON.stringify(plugin))
+        if (plugin?.state.status !== 'active') return false
+      }
+      return true
+    })
+    await ready()
+    const bundled = (await request('skill')).filter(skill => skill.path.startsWith(resolve(root, 'opencode/skills') + '/'))
     assert.deepEqual(bundled.map(skill => skill.name).sort(), names)
     assert.ok(bundled.every(skill => skill.content.includes('harness-adapter.md')))
+    const agents = await request('agent')
     for (const [name, role] of Object.entries(roles)) {
-      const agent = JSON.parse(await run(['debug', 'agent', name]))
-      assert.equal(agent.name, name)
+      const agent = agents.find(agent => agent.id === name)
+      assert.ok(agent, name)
       assert.equal(agent.mode, 'subagent')
       assert.equal(agent.model, undefined)
-      if (role.reportOnly) {
-        assert.equal(agent.tools.edit, false)
-        assert.equal(agent.tools.write, false)
-      }
+      assert.ok(agent.system.includes(role.prompt))
+      assert.deepEqual(agent.permissions.filter(rule => rule.action === 'edit'), role.reportOnly ? [{ action: 'edit', resource: '*', effect: 'deny' }] : [])
     }
+
+    const permissions = [{ action: 'edit', resource: '*.md', effect: 'ask' }, { action: 'shell', resource: '*', effect: 'deny' }]
+    config.agents = {
+      existing: { model: 'local/existing' },
+      'pstack-reviewer': { model: 'local/reviewer-b#high', system: 'User-owned instructions', permissions },
+      'pstack-reviewer-alt': { disabled: true },
+    }
+    await writeFile(configPath, JSON.stringify(config))
+    await request('location/reload', 'POST')
+    await ready()
+    const overridden = await request('agent')
+    const reviewer = overridden.find(agent => agent.id === 'pstack-reviewer')
+    assert.deepEqual(reviewer.model, { providerID: 'local', id: 'reviewer-b', variant: 'high' })
+    assert.equal(reviewer.system, 'User-owned instructions')
+    assert.deepEqual(reviewer.permissions.filter(rule => ['edit', 'shell'].includes(rule.action)), [{ action: 'edit', resource: '*', effect: 'deny' }, ...permissions])
+    assert.ok(!overridden.some(agent => agent.id === 'pstack-reviewer-alt'))
+    assert.deepEqual(overridden.find(agent => agent.id === 'existing').model, { providerID: 'local', id: 'existing' })
   } finally {
+    if (server && server.exitCode === null && server.signalCode === null) {
+      const exited = new Promise(resolve => server.once('exit', resolve))
+      server.kill('SIGTERM')
+      await exited
+    }
     await rm(scratch, { recursive: true, force: true })
   }
 })

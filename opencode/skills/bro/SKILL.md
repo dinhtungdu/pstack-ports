@@ -1,8 +1,6 @@
 ---
 name: bro
 description: Restate the last message in plain human language, with no jargon.
-metadata:
-  opencode/slash: "true"
 ---
 
 **OpenCode port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
