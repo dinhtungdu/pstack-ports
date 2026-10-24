@@ -1,7 +1,7 @@
 # pstack for Amp
 
 An Amp directory plugin containing pstack's engineering workflows and principles.
-It registers 52 qualified skills, including `pstack:poteto-mode`, `pstack:architect`,
+It registers 56 qualified skills, including `pstack:poteto-mode`, `pstack:architect`,
 `pstack:interrogate`, and `pstack:swarm`. All skills and playbooks load on demand.
 It adds no tools, hooks, services, or project-specific behavior.
 
@@ -33,7 +33,7 @@ does not overwrite them. Use `pstack:*` names to select this copy.
 
 [AMP.md](AMP.md) defines the translation from Cursor instructions to Amp tools.
 Each registered skill includes a local copy so it remains available when the
-skill package is materialized separately. The bodies of 52 skills remain verbatim
+skill package is materialized separately. The bodies of 56 skills remain verbatim
 from upstream, including their model tables. Amp frontmatter normalization and
 the adapter preface are generated separately. There are no replacement bodies.
 
@@ -44,9 +44,13 @@ the adapter preface are generated separately. There are no replacement bodies.
 - Cursor model setup, bot webhooks, and Benny automation are excluded, along
   with non-Amp plugin manifests and installation docs. The adapter skips their
   references in unchanged upstream skills and guides.
-- Scripts never install dependencies automatically. Copy the complete
+- Scripts do not install dependencies by default. Copy the complete
   `skills/poteto-mode/scripts/` directory to writable scratch and run
   `bun install --frozen-lockfile` there before using `orch` or `watch-pr`.
+- Statechart needs Java and TLC. PNG output also needs Pele and resvg.
+  Provision dependencies explicitly, or approve the downloads and set
+  `PSTACK_ALLOW_INSTALL=1` for that command. Keep inputs and `XDG_CACHE_HOME` in
+  task-owned scratch. The adapter overrides upstream's automatic-install text.
 - The worktree audit reports unknown Amp activity and never labels a row safe
   to delete. It still fetches refs and queries the forge.
 - Instructions do not grant publishing, merging, deletion, or shared-write
@@ -69,8 +73,8 @@ local checks.
 
 ## Upstream and license
 
-Based on Lauren Tan's pstack 0.15.25 at
-[cursor/plugins revision 101b274](https://github.com/cursor/plugins/tree/101b274dd991f694e1f7024be2157e5f3adf07de/pstack).
+Based on Lauren Tan's pstack 0.15.32 at
+[cursor/plugins revision 9580c23](https://github.com/cursor/plugins/tree/9580c23696ac8d7abed0c166f2f9918800afb819/pstack).
 The [MIT license](LICENSE) and attribution are retained. The original guide and
 assets remain as workflow reference. Follow this README and the Amp adapter for
 installation and tool usage, not Cursor instructions in upstream reference text.

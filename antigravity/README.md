@@ -7,7 +7,7 @@ agy plugin install ./antigravity
 agy plugin list --json
 ```
 
-Expect plugin `pstack` with 52 skills and six agents. In the App or IDE, you can
+Expect plugin `pstack` with 56 skills and six agents. In the App or IDE, you can
 instead copy this entire directory into `<project>/.agents/plugins/pstack/`
 for one workspace, or `~/.gemini/config/plugins/pstack/` for all workspaces.
 Do not merge with an existing pstack directory without reviewing its changes.
@@ -72,7 +72,7 @@ workspace, evidence, and absence of file changes. Then test poteto-agent on a
 disposable Git repository before using it for real work.
 
 Verified with agy 1.4.1: strict validation has no findings, native installation
-discovers all 52 skills and six agents, and installed definitions remain valid
+discovers all 56 skills and six agents, and installed definitions remain valid
 after applying flash and pro settings. Tests use an isolated home directory
 and leave the user's global plugins unchanged. Native CLI checks run when agy
 is available. No model is invoked, so App delegation and actual tier selection

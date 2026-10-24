@@ -12,7 +12,7 @@ upstream text mean the corresponding installed skill, not shell commands.
 Pass the absolute poteto-mode skill path to every delegate. Bare skill names
 can collide with separately installed copies; select this plugin's path.
 
-The 52 skill bodies and 23 playbooks are preserved. Cursor setup-pstack,
+The 56 skill bodies and 23 playbooks are preserved. Cursor setup-pstack,
 make-bot-ui, Benny automation, Custom Modes, and team-kit are not implemented.
 Skip their routes and installation links. Do not offer placeholder commands.
 For deslop, inspect the diff and run the project's lint. For control-ui or
@@ -90,6 +90,16 @@ Node for check-plan.mjs, Bash for log.sh, and authenticated Git and forge tools.
 Copy the complete poteto-mode/scripts directory to task-owned scratch and run
 bun install --frozen-lockfile there. Never install into a shared plugin cache.
 Run that copy with the target repository as the working directory.
+
+Statechart requires Node, Java 11 or later, and TLC. PNG output also requires
+Pele and resvg. Dependency installation is disabled by default, overriding the
+upstream skill text. Use provisioned TLA2TOOLS and JAVA paths, or approve the
+downloads before setting PSTACK_ALLOW_INSTALL=1 for one command. Set
+XDG_CACHE_HOME to task-owned scratch when installing renderer dependencies.
+Copy inputs into task-owned scratch too: --out does not relocate adjacent
+mapping and model files, and reruns replace generated output. Never overwrite
+unrelated files or run against shared plugin-cache inputs. Mapping modules are
+executable JavaScript; review them and their imports before running them.
 
 worktree-audit.sh fetches remote refs and queries PRs. Its unknown Amp activity
 column is also unknown Antigravity activity. No row proves deletion safe.

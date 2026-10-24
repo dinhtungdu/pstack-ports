@@ -31,7 +31,7 @@ test('registers only the skill catalog with portable adapter resources', async (
 })
 
 test('preserves every shipped skill body verbatim from upstream', async () => {
-	expect(Object.keys(upstreamBodies)).toHaveLength(52)
+	expect(Object.keys(upstreamBodies)).toHaveLength(56)
 	for (const [name, hash] of Object.entries(upstreamBodies)) {
 		const text = await readFile(`pstack/skills/${name}/SKILL.md`, 'utf8')
 		const marker = 'Load bundled skills as `pstack:<name>`.\n\n'

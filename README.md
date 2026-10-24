@@ -1,6 +1,6 @@
 # Pstack ports
 
-Pstack's 52 engineering skills and 23 playbooks, packaged for
+Pstack's 56 engineering skills and 23 playbooks, packaged for
 [Amp](pstack/README.md), [Antigravity](antigravity/README.md), and
 [OpenCode V2](opencode/README.md). Each port adds a harness adapter;
 Antigravity and OpenCode also add six native agent roles. No package dependencies
@@ -52,14 +52,30 @@ upstream upgrade, review the new source first, then deliberately update that
 manifest and the pin below. Review resource and script changes separately.
 The hash manifest verifies skill bodies, not every bundled script.
 
+Use a task-owned staging copy of the upstream `pstack/` directory. Exclude
+`setup-pstack`, `make-bot-ui`, and `docs/harness`. Preserve normalized frontmatter,
+the local `no-comments/comment-sicko.md` resource, and the safety adaptations in
+`poteto-mode/scripts/bootstrap.ts`, `poteto-mode/scripts/worktree-audit.sh`, and
+`statechart/scripts/{render,tlc-tools,statechart-help}.mjs`. Merge upstream fixes
+into these files rather than replacing them blindly. Include added skills and
+remove retired skills from both the manifest and `upstream/skills/`.
+Import the reviewed staging copy, update catalog counts, then run the checks above.
+
+Weekly updates run through an Amp schedule in the
+[upstream maintenance thread](https://ampcode.com/threads/T-01a16cdc-2b09-73cf-8c64-b8c44c76673a).
+It reviews upstream changes, updates this checkout, rebuilds all three bundles,
+and reports verification. It does not push, publish, or update installed plugins.
+The local runner must be available for the scheduled run.
+
 ## Sources and limits
 
-Based on Lauren Tan's pstack 0.15.25 at
-[cursor/plugins revision 101b274](https://github.com/cursor/plugins/tree/101b274dd991f694e1f7024be2157e5f3adf07de/pstack),
+Based on Lauren Tan's pstack 0.15.32 at
+[cursor/plugins revision 9580c23](https://github.com/cursor/plugins/tree/9580c23696ac8d7abed0c166f2f9918800afb819/pstack),
 seeded from the reviewed Amp port at
 [amp-plugins revision 620fcf1](https://github.com/dinhtungdu/amp-plugins/commit/620fcf1420fb97c3f5685f6124de8e9136a222d5).
-The skill bodies remain verbatim. Resources include that port's script safety
-adaptations. The original guide describes Cursor; use each port's README and
+The skill bodies remain verbatim. Resources retain that port's script safety
+adaptations and require explicit opt-in for statechart dependency downloads.
+The original guide describes Cursor; use each port's README and
 adapter for installation and harness behavior. MIT attribution is retained.
 
 Guidelines consulted on 2026-10-19:
@@ -73,11 +89,11 @@ Guidelines consulted on 2026-10-19:
   [agent configuration](https://github.com/anomalyco/opencode/blob/815de9950b205cd734c9962c4629b07d3b83ee07/packages/core/src/config/plugin/agent.ts),
   and [subagent parameters](https://github.com/anomalyco/opencode/blob/815de9950b205cd734c9962c4629b07d3b83ee07/packages/core/src/tool/plugin/subagent.ts).
 
-Antigravity CLI 1.4.1 passes strict plugin validation and discovers all 52 skills
+Antigravity CLI 1.4.1 passes strict plugin validation and discovers all 56 skills
 and six agents after an isolated native install. Its validator also accepts
 installed agents after applying flash and pro routing settings. These checks
 do not invoke a model or prove App delegation. OpenCode V2 2.0.32 loads all
-52 skills and six agents in an isolated server. Its native configuration keeps
+56 skills and six agents in an isolated server. Its native configuration keeps
 model, variant, system prompt, disabled-agent, and permission overrides.
 Run this check with `OPENCODE_V2_BIN=/absolute/path/to/v2/opencode npm test`.
 OpenCode model calls and paid provider routing remain unverified.

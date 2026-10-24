@@ -13,8 +13,8 @@ const hashes = JSON.parse(await read('upstream-bodies.json'))
 const names = Object.keys(hashes).sort()
 const roles = JSON.parse(await read('agents.json'))
 
-test('both bundles preserve all 52 pinned bodies, adapters, and complete skill resources', async () => {
-  assert.equal(names.length, 52)
+test('both bundles preserve all 56 pinned bodies, adapters, and complete skill resources', async () => {
+  assert.equal(names.length, 56)
   const sourceFiles = (await readdir(resolve(root, 'upstream/skills'), { recursive: true, withFileTypes: true }))
     .filter(entry => entry.isFile())
     .map(entry => resolve(entry.parentPath, entry.name).slice(resolve(root, 'upstream/skills').length + 1))
@@ -39,6 +39,36 @@ test('both bundles preserve all 52 pinned bodies, adapters, and complete skill r
     }
     for (const excluded of ['setup-pstack', 'make-bot-ui']) assert.ok(!names.includes(excluded))
     assert.equal(await read(`${harness}/LICENSE`), await read('upstream/LICENSE'))
+  }
+})
+
+test('statechart refuses dependency installation by default in every bundle', async () => {
+  await mkdir(resolve(root, '.amp/in'), { recursive: true })
+  const scratch = await mkdtemp(resolve(root, '.amp/in/statechart-install-'))
+  try {
+    const bin = resolve(scratch, 'bin')
+    const log = resolve(scratch, 'commands.log')
+    const cache = resolve(scratch, 'cache')
+    await mkdir(bin)
+    for (const tool of ['mise', 'npm']) {
+      await writeFile(resolve(bin, tool), '#!/bin/sh\nprintf "%s\\n" "$*" >> "$COMMAND_LOG"\nprintf "not installed\\n" >&2\nexit 1\n', { mode: 0o755 })
+    }
+    await writeFile(resolve(scratch, 'flow.mmd'), 'stateDiagram-v2\n  [*] --> Waiting\n  Waiting --> Ready : continue\n')
+    const env = { ...process.env, PATH: bin, COMMAND_LOG: log, XDG_CACHE_HOME: cache, TLA2TOOLS: '', JAVA: '', PSTACK_ALLOW_INSTALL: '' }
+    for (const harness of ['pstack', 'antigravity', 'opencode']) {
+      for (const command of ['from-chart', 'render']) {
+        const result = spawnSync(process.execPath, [resolve(root, harness, 'skills/statechart/scripts/statechart.mjs'), command, 'flow.mmd'], {
+          cwd: scratch, env, encoding: 'utf8', timeout: 10000,
+        })
+        assert.equal(result.status, 2, result.error?.message ?? result.stderr)
+        assert.match(result.stderr, /Automatic dependency installation is disabled/)
+      }
+    }
+    assert.doesNotMatch(await readFile(log, 'utf8'), /^install\b/m)
+    assert.ok(!(await readdir(scratch)).includes('cache'))
+    assert.ok(!(await readdir(scratch)).includes('flow.png'))
+  } finally {
+    await rm(scratch, { recursive: true, force: true })
   }
 })
 
@@ -178,7 +208,7 @@ test('agy validates, installs, discovers, and accepts routing on an isolated nat
     }
     const validation = JSON.parse(run('plugin', 'validate', resolve(root, 'antigravity'), '--strict', '--json'))
     assert.deepEqual(validation.findings, [])
-    assert.equal(validation.components.skills, 52)
+    assert.equal(validation.components.skills, names.length)
     assert.equal(validation.components.agents, 6)
     run('plugin', 'install', resolve(root, 'antigravity'))
     const installed = JSON.parse(run('plugin', 'list', '--json')).find(plugin => plugin.name === 'pstack')

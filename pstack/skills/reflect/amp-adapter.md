@@ -100,6 +100,16 @@ complete scripts directory to task-owned scratch, install with
 as cwd. Never install into the shared plugin cache. The plugin itself installs
 nothing and starts no process beyond skill registration.
 
+Statechart requires Node, Java 11 or later, and TLC. PNG output also requires
+Pele and resvg. Dependency installation is disabled by default, overriding the
+upstream skill text. Use provisioned TLA2TOOLS and JAVA paths, or approve the
+downloads before setting PSTACK_ALLOW_INSTALL=1 for one command. Set
+XDG_CACHE_HOME to task-owned scratch when installing renderer dependencies.
+Copy inputs into task-owned scratch too: --out does not relocate adjacent
+mapping and model files, and reruns replace generated output. Never overwrite
+unrelated files or run against shared plugin-cache inputs. Mapping modules are
+executable JavaScript; review them and their imports before running them.
+
 The worktree audit fetches remote refs and queries PRs. Its Amp chat-activity
 column is unknown; no row is proof that deleting a worktree is safe. Confirm
 ownership, active threads, untracked files, and unpushed commits before proposing
