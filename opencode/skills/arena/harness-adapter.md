@@ -15,6 +15,18 @@ Use native file reads for sibling resources. Pass the absolute poteto-mode
 skill path to every delegate. A slash invocation means a skill, not a shell
 command. Use the native skill tool when a slash entry is unavailable.
 
+For skill discovery and authoring, translate `.cursor/skills/` to the workspace's
+`.agents/skills/` and `~/.cursor/skills/` to the OpenCode config directory's
+`skills/`, by default `~/.config/opencode/skills/`. Honor XDG_CONFIG_HOME.
+Search native skill locations, including `.opencode/skills/`, before creating a
+skill. Preserve an existing editable skill's location and category. Copy plugin
+skills to the chosen native location before editing; never edit plugin caches.
+Apply these paths to generated skills, feature maps, and reflect's approved copies.
+Replace Cursor's built-in `create-skill` with an installed skill-authoring skill.
+If none is available, use native tools and the documented SKILL.md format.
+Keep the requested draft, test, iterate, and description-optimization steps.
+Report any evaluation capability the active tools cannot provide.
+
 The 56 skill bodies and 23 playbooks are preserved. Cursor setup-pstack,
 make-bot-ui, Benny automation, Custom Modes, and team-kit are excluded.
 Skip their routes and upstream installation links. Do not invent placeholders.
@@ -75,6 +87,13 @@ sessions, use supported V2 session APIs with the exact session ID. Do not run
 Cursor transcript globs or scan other projects. Give reviewers a scoped digest if raw history is unavailable, and
 identify tool-level claims that cannot be verified. Use only installed tools
 and configured MCP servers. Do not assume a read-only role loses all MCP access.
+
+A native skill load or file read of its SKILL.md or resources counts as
+skill-use evidence at the actual installed path, including plugin paths.
+A delegate prompt naming that path or a call matching documented commands also
+counts. Cursor tool names and directories are not required. Include this mapping
+in reviewer briefs alongside unchanged reflect templates. Preserve the distinction
+between a used skill and a missed trigger. A summary alone does not prove use.
 
 Loading a skill grants no permission to publish, push, merge, post, deploy,
 change shared data, or delete work. Existing user authorization and OpenCode

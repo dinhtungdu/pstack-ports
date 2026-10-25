@@ -12,6 +12,17 @@ upstream text mean the corresponding installed skill, not shell commands.
 Pass the absolute poteto-mode skill path to every delegate. Bare skill names
 can collide with separately installed copies; select this plugin's path.
 
+For skill discovery and authoring, translate `.cursor/skills/` to the workspace's
+`.agents/skills/` and `~/.cursor/skills/` to `~/.gemini/config/skills/`.
+Search native skill locations before creating a skill. Preserve an existing
+editable skill's location and category. Copy plugin skills to the chosen native
+location before editing; never edit installed plugin caches. Apply these paths
+to generated skills, feature maps, and reflect's approved copies too.
+Replace Cursor's built-in `create-skill` with an installed skill-authoring skill.
+If none is available, use native tools and the documented SKILL.md format.
+Keep the requested draft, test, iterate, and description-optimization steps.
+Report any evaluation capability the active tools cannot provide.
+
 The 56 skill bodies and 23 playbooks are preserved. Cursor setup-pstack,
 make-bot-ui, Benny automation, Custom Modes, and team-kit are not implemented.
 Skip their routes and installation links. Do not offer placeholder commands.
@@ -71,6 +82,13 @@ use native history or explicitly scoped, authorized transcripts. Never run the
 upstream Cursor transcript globs or search unrelated projects. If raw history
 is unavailable, provide a scoped digest and disclose unverified tool claims.
 Give native tools their real arguments. Do not invent Amp or Cursor APIs.
+
+A native skill load or file read of its SKILL.md or resources counts as
+skill-use evidence at the actual installed path, including plugin paths.
+A delegate prompt naming that path or a call matching documented commands also
+counts. Cursor tool names and directories are not required. Include this mapping
+in reviewer briefs alongside unchanged reflect templates. Preserve the distinction
+between a used skill and a missed trigger. A summary alone does not prove use.
 
 Loading a skill does not authorize publishing, pushing, merging, posting,
 deploying, shared writes, or deletion. Preserve explicit user permissions and

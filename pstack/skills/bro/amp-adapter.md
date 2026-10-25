@@ -25,16 +25,21 @@ Use a Markdown task list when no todo tool exists.
 ## Delegation and models
 
 Use the native `Task` tool for bounded assignments within its stated conditions.
-It blocks until completion; calls issued together can run concurrently. It has
-no Cursor `model`, `subagent_type`, `readonly`, `run_in_background`, `resume`,
+`mode: "wait"` blocks until completion. Calls issued together can run concurrently.
+Translate background work to `mode: "async"` when the parent has independent work.
+Completion arrives as a message. Do not poll or wait on an async worker.
+Use `id` to continue a worker when its retained context or local state is needed.
+Use a fresh worker for a new independent assignment. Task has no Cursor
+`model`, `subagent_type`, `readonly`, `run_in_background`, `resume`,
 `environment`, or `file_attachments` fields. Do not pass them or invent aliases.
 Give read-only workers explicit no-edit scope; check returned evidence and diffs.
 Keep workers' writes disjoint. Do not claim worktree isolation without creating it.
 
 For a poteto delegate, include the resolved `pstack:poteto-mode` skill path and
 require a full read, including this adapter and applicable principle leaves.
-For Comment Sicko, supply `agents/comment-sicko.md` as the brief and require a
-report only. The parent decides and applies accepted changes.
+For Comment Sicko, load `pstack:no-comments` and supply its sibling
+`comment-sicko.md` as the brief. Require a report only.
+The parent decides and applies accepted changes.
 
 Upstream model tables and `pstack-models.mdc` do not configure Amp. Default to the
 session's native worker model. Report missing model diversity; never label
