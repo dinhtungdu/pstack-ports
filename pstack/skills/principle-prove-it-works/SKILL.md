@@ -3,7 +3,7 @@ name: principle-prove-it-works
 description: "Apply after completing a task, before declaring done. Verify against the real artifact (run the feature, read the actual value, inspect the diff), not a proxy, self-report, or 'it compiles.'"
 ---
 
-**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load bundled skills as `pstack:<name>`.
+**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load sibling skills by bare name.
 
 
 # Prove It Works

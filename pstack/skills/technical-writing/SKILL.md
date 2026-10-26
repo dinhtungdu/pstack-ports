@@ -3,7 +3,7 @@ name: technical-writing
 description: "Layered technical-writing standard: Diátaxis structure, Google developer style sentences, STE instruction rules, Global English syntax. Use for /technical-writing or when writing or reviewing docs, RFCs, readmes, PR descriptions, or commit messages."
 ---
 
-**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load bundled skills as `pstack:<name>`.
+**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load sibling skills by bare name.
 
 
 # Technical writing

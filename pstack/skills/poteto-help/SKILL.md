@@ -3,7 +3,7 @@ name: poteto-help
 description: Guides users through pstack setup, /poteto-mode, and picking the skill, playbook, or principle for a task. Type /poteto-help with a question.
 ---
 
-**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load bundled skills as `pstack:<name>`.
+**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load sibling skills by bare name.
 
 
 # Poteto help

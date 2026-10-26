@@ -3,7 +3,7 @@ name: principle-redesign-from-first-principles
 description: "Apply when integrating a new requirement into an existing design."
 ---
 
-**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load bundled skills as `pstack:<name>`.
+**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load sibling skills by bare name.
 
 
 # Redesign From First Principles

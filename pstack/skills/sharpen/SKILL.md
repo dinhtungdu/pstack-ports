@@ -3,7 +3,7 @@ name: sharpen
 description: "Make a task deeper, not bigger, then rewrite the prompt. Use for /sharpen."
 ---
 
-**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load bundled skills as `pstack:<name>`.
+**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load sibling skills by bare name.
 
 
 I want a deeper version of this task, not a bigger one. Before rewriting it, do four things:

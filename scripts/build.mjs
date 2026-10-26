@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 const root = fileURLToPath(new URL('../', import.meta.url))
 const hashes = JSON.parse(await readFile(resolve(root, 'upstream-bodies.json'), 'utf8'))
 const names = Object.keys(hashes).sort()
-const ampPreface = '**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load bundled skills as `pstack:<name>`.\n\n'
+const ampPreface = '**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load sibling skills by bare name.\n\n'
 
 function splitSkill(text) {
   const header = text.match(/^---\n([\s\S]*?)\n---\n/)
@@ -63,11 +63,19 @@ for (const harness of ['antigravity', 'opencode', 'pstack']) {
     const preface = isAmp ? ampPreface : `**${harness === 'opencode' ? 'OpenCode' : 'Antigravity'} port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.\n\n`
     await writeFile(resolve(base, 'SKILL.md'), `---\n${isAmp ? header : `name: ${name}\ndescription: ${description}`}\n---\n\n${preface}${body}`)
     await writeFile(resolve(base, isAmp ? 'amp-adapter.md' : 'harness-adapter.md'), adapter)
+    // Amp installs each skill as its own directory, so each carries the license.
+    if (isAmp) await cp(resolve(root, 'upstream/LICENSE'), resolve(base, 'LICENSE'))
+  }
+  if (isAmp) {
+    // Skills repositories serve text only; the guide's images stay behind.
+    await cp(resolve(root, 'upstream/docs/guide'), resolve(dest, 'skills/poteto-help/docs/guide'), {
+      recursive: true, filter: path => !path.endsWith('/images'),
+    })
+    continue
   }
   for (const resource of ['LICENSE', 'docs', 'assets']) {
     await cp(resolve(root, 'upstream', resource), resolve(dest, resource), { recursive: true })
   }
-  if (isAmp) continue
   await rm(resolve(dest, 'agents'), { recursive: true, force: true })
   await mkdir(resolve(dest, 'agents'), { recursive: true })
   const definitions = {}

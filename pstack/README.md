@@ -1,40 +1,37 @@
 # pstack for Amp
 
-An Amp directory plugin containing pstack's engineering workflows and principles.
-It registers 56 qualified skills, including `pstack:poteto-mode`, `pstack:architect`,
-`pstack:interrogate`, and `pstack:swarm`. All skills and playbooks load on demand.
-It adds no tools, hooks, services, or project-specific behavior.
+pstack's engineering workflows and principles as 56 Amp skills, published to the
+personal Amp skills repository (`https://ampcode.com/git/@000/-/skills`). Skills
+use bare names, such as `poteto-mode`, `architect`, `interrogate`, and `swarm`,
+and load on demand. They add no tools, hooks, services, or project-specific
+behavior.
 
-## Use the port
+## Publish
 
-From the cloned repository root, copy the complete directory into a project's
-plugin directory (only if `pstack` is not already installed there):
+`skills/` holds one self-contained directory per skill, each named after its
+frontmatter `name`, with its own adapter and license. Amp serves text files only
+and installs each skill as a separate directory, so skills cannot share files.
+
+After `npm run build` and the checks below, copy the skills into the canonical
+clone of the personal skills repository:
 
 ```sh
-mkdir -p /path/to/project/.amp/plugins
-cp -R ./pstack /path/to/project/.amp/plugins/pstack
+node scripts/publish-amp.mjs ~/.cache/amp/repositories/ampcode.com-user-skills
 ```
 
-For this machine's user-local installation, use `~/.config/amp/plugins/pstack`
-instead. For a managed User Plugins repository, copy only this `pstack/` directory
-into its root and follow Amp's signed commit and push workflow. Do not copy the
-Antigravity or OpenCode bundles into an Amp plugins repository.
+The script replaces only the directories of skills built here. Delete skills
+retired upstream from the clone by hand. Review the diff, commit, and push there.
+New threads pick up pushed skills; existing threads need `reload_skills`.
 
-Keep the directory named `pstack`: it determines the `pstack:*` skill namespace.
-Start a new thread or reload plugins after installation. Publishing this GitHub
-repository alone does not install or update the plugin. Skills remain available
-for manual loading everywhere. Ask for `pstack:poteto-mode` to use the workflow
-or `pstack:poteto-help` for guidance.
-
-Existing bare skills such as `architect` are separate installations. This plugin
-does not overwrite them. Use `pstack:*` names to select this copy.
+A local skill with the same name, for example in `~/.agents/skills`, masks the
+published copy. Remove or move such copies. Ask for `poteto-mode` to use the
+workflow or `poteto-help` for guidance.
 
 ## Port boundaries
 
 [AMP.md](AMP.md) defines the translation from Cursor instructions to Amp tools.
-Each registered skill includes a local copy so it remains available when the
-skill package is materialized separately. The bodies of 56 skills remain verbatim
-from upstream, including their model tables. Amp frontmatter normalization and
+Each skill includes a local copy of the adapter. The bodies of 56 skills remain
+verbatim from upstream, including their model tables. Amp frontmatter normalization and
 the adapter preface are generated separately. There are no replacement bodies.
 
 - Native Task delegates inherit the available worker model. Cursor role-model
@@ -58,8 +55,7 @@ the adapter preface are generated separately. There are no replacement bodies.
 
 ## Verify changes
 
-From the repository root, run `npm run build`, `bun test ./tests/amp.test.ts`, and
-`amp plugins exec ./pstack session.start --data '{"thread":{"id":"test"}}'`.
+From the repository root, run `npm run build`, `npm test`, and `npm run lint`.
 Run `npm run build` after changing `pstack/AMP.md` to refresh bundled adapters.
 The build uses the shared `upstream/` source and rejects skill bodies differing
 from `upstream-bodies.json`. See the [repository README](../README.md) for importing
@@ -75,6 +71,7 @@ local checks.
 
 Based on Lauren Tan's pstack 0.15.32 at
 [cursor/plugins revision 9580c23](https://github.com/cursor/plugins/tree/9580c23696ac8d7abed0c166f2f9918800afb819/pstack).
-The [MIT license](LICENSE) and attribution are retained. The original guide and
-assets remain as workflow reference. Follow this README and the Amp adapter for
-installation and tool usage, not Cursor instructions in upstream reference text.
+The [MIT license](../LICENSE) and attribution are retained in every skill. The
+original guide pages ship in `poteto-help/docs/guide/` as workflow reference,
+without images. Follow this README and the Amp adapter for installation and tool
+usage, not Cursor instructions in upstream reference text.

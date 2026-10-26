@@ -5,6 +5,6 @@
   "scripts": {
     "build": "node scripts/build.mjs",
     "test": "node --test tests/*.test.mjs && bun test tests/amp.test.ts",
-    "lint": "node --check scripts/build.mjs && node --check antigravity/configure-models.mjs && node --check opencode/index.js && node --check tests/ports.test.mjs && git diff --check && git diff --cached --check"
+    "lint": "node --check scripts/build.mjs && node --check scripts/publish-amp.mjs && node --check antigravity/configure-models.mjs && node --check opencode/index.js && node --check tests/ports.test.mjs && git diff --check && git diff --cached --check"
   }
 }

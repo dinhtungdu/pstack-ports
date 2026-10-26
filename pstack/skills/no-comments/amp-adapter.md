@@ -6,11 +6,15 @@ The session's tool schemas, permissions, and user instructions take precedence.
 
 ## Skills and resources
 
-Load bundled skills with `skill(name: "pstack:<name>")`, including principles.
-Bare names can resolve to unrelated installed copies. Slash invocations in the
-upstream text mean the qualified skill, not a shell command. Resolve resources
-against the loaded skill's base directory, never the project's working directory.
-If sibling paths are unavailable, load the sibling through the skill tool.
+Load bundled skills by bare name with `skill(name: "<name>")`, including
+principles. Slash invocations in the upstream text mean that skill, not a shell
+command. Resolve resources against the loaded skill's base directory, never the
+project's working directory. Each skill is installed as its own directory, so
+paths into another skill, such as `../<name>/SKILL.md` or the guide's
+`../../skills/<name>/SKILL.md`, do not resolve: load that skill by name and
+resolve the rest of the path against its base directory. Upstream
+`../../docs/guide/` pages are bundled in `poteto-help` under `docs/guide/`.
+Guide images and the upstream Cursor README are not bundled.
 
 `setup-pstack`, `make-bot-ui`, and Benny automation are excluded because their
 Cursor integrations have no implemented Amp equivalent. References to them in
@@ -35,9 +39,9 @@ Use a fresh worker for a new independent assignment. Task has no Cursor
 Give read-only workers explicit no-edit scope; check returned evidence and diffs.
 Keep workers' writes disjoint. Do not claim worktree isolation without creating it.
 
-For a poteto delegate, include the resolved `pstack:poteto-mode` skill path and
+For a poteto delegate, include the resolved `poteto-mode` skill path and
 require a full read, including this adapter and applicable principle leaves.
-For Comment Sicko, load `pstack:no-comments` and supply its sibling
+For Comment Sicko, load `no-comments` and supply its sibling
 `comment-sicko.md` as the brief. Require a report only.
 The parent decides and applies accepted changes.
 
@@ -102,8 +106,8 @@ Scripts require their actual runtimes: Bun plus the locked dependencies for
 authentication for forge queries. Before using `orch` or `watch-pr`, copy the
 complete scripts directory to task-owned scratch, install with
 `bun install --frozen-lockfile` there, and run that copy with the target repository
-as cwd. Never install into the shared plugin cache. The plugin itself installs
-nothing and starts no process beyond skill registration.
+as cwd. Never install into the shared skill cache. The skills install
+nothing and start no process on their own.
 
 Statechart requires Node, Java 11 or later, and TLC. PNG output also requires
 Pele and resvg. Dependency installation is disabled by default, overriding the
@@ -112,7 +116,7 @@ downloads before setting PSTACK_ALLOW_INSTALL=1 for one command. Set
 XDG_CACHE_HOME to task-owned scratch when installing renderer dependencies.
 Copy inputs into task-owned scratch too: --out does not relocate adjacent
 mapping and model files, and reruns replace generated output. Never overwrite
-unrelated files or run against shared plugin-cache inputs. Mapping modules are
+unrelated files or run against shared skill-cache inputs. Mapping modules are
 executable JavaScript; review them and their imports before running them.
 
 The worktree audit fetches remote refs and queries PRs. Its Amp chat-activity

@@ -11,7 +11,7 @@ runtime dependencies.
 
 Clone this repository, then follow the port's README:
 
-- [Install Amp](pstack/README.md): native directory plugin, named `pstack`.
+- [Publish for Amp](pstack/README.md): bare-name skills in the personal Amp skills repository.
 - [Install Antigravity](antigravity/README.md): native directory plugin.
 - [Install OpenCode](opencode/README.md): native V2 JavaScript setup/transform plugin.
 
@@ -32,8 +32,7 @@ npm run lint
 Edit `pstack/AMP.md`, `antigravity/ADAPTER.md`, `opencode/ADAPTER.md`, or `agents.json`, then rebuild.
 Do not edit generated skills or generated agent definitions. Tests verify body
 hashes, complete resources, model inheritance, and preservation of user settings.
-Amp registers skills and includes worker briefing templates, not the
-six native agent definitions used by the other ports.
+Amp gets skills only, not the six native agent definitions used by the other ports.
 
 `upstream/` is the maintained source. The build makes three self-contained bundles,
 without symlinks or runtime access to `upstream/`. Keeping a single runtime shared
@@ -64,7 +63,7 @@ Import the reviewed staging copy, update catalog counts, then run the checks abo
 Weekly updates run through an Amp schedule in the
 [upstream maintenance thread](https://ampcode.com/threads/T-01a16cdc-2b09-73cf-8c64-b8c44c76673a).
 It reviews upstream changes, updates this checkout, rebuilds all three bundles,
-and reports verification. It does not push, publish, or update installed plugins.
+and reports verification. It does not push, publish, or update the published skills.
 The local runner must be available for the scheduled run.
 
 ## Sources and limits

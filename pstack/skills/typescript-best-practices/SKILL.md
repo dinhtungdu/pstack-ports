@@ -4,7 +4,7 @@ description: TypeScript best practices. Use when reading or editing any .ts or .
 paths: ["**/*.ts", "**/*.tsx"]
 ---
 
-**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load bundled skills as `pstack:<name>`.
+**Amp port.** Read [amp-adapter.md](amp-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below. Load sibling skills by bare name.
 
 
 # TypeScript best practices
