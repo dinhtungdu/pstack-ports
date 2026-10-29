@@ -43,11 +43,12 @@ the adapter preface are generated separately. There are no replacement bodies.
   references in unchanged upstream skills and guides.
 - Scripts do not install dependencies by default. Copy the complete
   `skills/poteto-mode/scripts/` directory to writable scratch and run
-  `bun install --frozen-lockfile` there before using `orch` or `watch-pr`.
-- Statechart needs Java and TLC. PNG output also needs Pele and resvg.
-  Provision dependencies explicitly, or approve the downloads and set
-  `PSTACK_ALLOW_INSTALL=1` for that command. Keep inputs and `XDG_CACHE_HOME` in
-  task-owned scratch. The adapter overrides upstream's automatic-install text.
+  `bun install --frozen-lockfile` there before using `watch-pr`.
+- Statechart runs on Node 22.18 or later, Bun, or Deno, and needs Java and TLC.
+  Rendering needs Pele. Provision dependencies explicitly, or approve the
+  downloads and set `PSTACK_ALLOW_INSTALL=1` for that command. Keep inputs and
+  `XDG_CACHE_HOME` in task-owned scratch. The adapter overrides upstream's
+  automatic-install text.
 - The worktree audit reports unknown Amp activity and never labels a row safe
   to delete. It still fetches refs and queries the forge.
 - Instructions do not grant publishing, merging, deletion, or shared-write
@@ -69,8 +70,8 @@ local checks.
 
 ## Upstream and license
 
-Based on Lauren Tan's pstack 0.15.32 at
-[cursor/plugins revision 9580c23](https://github.com/cursor/plugins/tree/9580c23696ac8d7abed0c166f2f9918800afb819/pstack).
+Based on Lauren Tan's pstack 0.15.36 at
+[cursor/plugins revision c742dd6](https://github.com/cursor/plugins/tree/c742dd61706fbacc1b95f1a20b7b988cf096ce6c/pstack).
 The [MIT license](../LICENSE) and attribution are retained in every skill. The
 original guide pages ship in `poteto-help/docs/guide/` as workflow reference,
 without images. Follow this README and the Amp adapter for installation and tool

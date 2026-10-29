@@ -103,21 +103,25 @@ does not auto-load poteto-mode. Use the native task list when available.
 ## Bundled scripts
 
 Scripts are inherited from the reviewed Amp port, not claimed as unmodified
-Cursor resources. They require Bun and locked dependencies for orch and watch-pr,
+Cursor resources. They require Bun and locked dependencies for watch-pr,
 Node for check-plan.mjs, Bash for log.sh, and authenticated Git and forge tools.
 Copy the complete poteto-mode/scripts directory to task-owned scratch and run
 bun install --frozen-lockfile there. Never install into a shared plugin cache.
 Run that copy with the target repository as the working directory.
 
-Statechart requires Node, Java 11 or later, and TLC. PNG output also requires
-Pele and resvg. Dependency installation is disabled by default, overriding the
-upstream skill text. Use provisioned TLA2TOOLS and JAVA paths, or approve the
-downloads before setting PSTACK_ALLOW_INSTALL=1 for one command. Set
-XDG_CACHE_HOME to task-owned scratch when installing renderer dependencies.
-Copy inputs into task-owned scratch too: --out does not relocate adjacent
-mapping and model files, and reruns replace generated output. Never overwrite
-unrelated files or run against shared plugin-cache inputs. Mapping modules are
-executable JavaScript; review them and their imports before running them.
+Statechart's `scripts/statechart` wrapper runs `statechart.ts` with
+Node 22.18 to 22.x or 23.6 or later, Bun 1.1.5 or later, or Deno 2. Model
+checking requires Java 11 or later and TLC (`tla2tools.jar`). The first-run mise
+install of Java and TLC is disabled by default, overriding the upstream skill
+text. Use provisioned TLA2TOOLS and JAVA paths, or approve the downloads before
+setting PSTACK_ALLOW_INSTALL=1 for one command. Rendering per
+`references/render.md` requires `pele@1.9.0` from npm; install it only with
+approval, in task-owned scratch outside the repository and the plugin cache. The
+script tests need `fast-check` and download Pele, Mermaid, and jsdom into
+`$XDG_CACHE_HOME/statechart`; run them only in a scratch copy with
+XDG_CACHE_HOME in scratch. Keep specs, configs, views, and `--out` folders in
+task-owned scratch, never in shared plugin-cache inputs. View modules are
+executable code; review them and their imports before running them.
 
 worktree-audit.sh fetches remote refs and queries PRs. Its unknown Amp activity
 column is also unknown Antigravity activity. No row proves deletion safe.

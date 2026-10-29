@@ -55,7 +55,7 @@ Use a task-owned staging copy of the upstream `pstack/` directory. Exclude
 `setup-pstack`, `make-bot-ui`, and `docs/harness`. Preserve normalized frontmatter,
 the local `no-comments/comment-sicko.md` resource, and the safety adaptations in
 `poteto-mode/scripts/bootstrap.ts`, `poteto-mode/scripts/worktree-audit.sh`, and
-`statechart/scripts/{render,tlc-tools,statechart-help}.mjs`. Merge upstream fixes
+`statechart/scripts/run.ts`. Merge upstream fixes
 into these files rather than replacing them blindly. Include added skills and
 remove retired skills from both the manifest and `upstream/skills/`.
 Import the reviewed staging copy, update catalog counts, then run the checks above.
@@ -68,8 +68,8 @@ The local runner must be available for the scheduled run.
 
 ## Sources and limits
 
-Based on Lauren Tan's pstack 0.15.32 at
-[cursor/plugins revision 9580c23](https://github.com/cursor/plugins/tree/9580c23696ac8d7abed0c166f2f9918800afb819/pstack),
+Based on Lauren Tan's pstack 0.15.36 at
+[cursor/plugins revision c742dd6](https://github.com/cursor/plugins/tree/c742dd61706fbacc1b95f1a20b7b988cf096ce6c/pstack),
 seeded from the reviewed Amp port at
 [amp-plugins revision 620fcf1](https://github.com/dinhtungdu/amp-plugins/commit/620fcf1420fb97c3f5685f6124de8e9136a222d5).
 The skill bodies remain verbatim. Resources retain that port's script safety

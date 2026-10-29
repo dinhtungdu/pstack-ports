@@ -3,7 +3,7 @@ import assert from 'node:assert/strict'
 import { createHash } from 'node:crypto'
 import { cp, mkdir, mkdtemp, readFile, readdir, realpath, rm, writeFile } from 'node:fs/promises'
 import { spawn, spawnSync } from 'node:child_process'
-import { resolve } from 'node:path'
+import { dirname, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import PstackPlugin from '../opencode/index.js'
 
@@ -50,23 +50,20 @@ test('statechart refuses dependency installation by default in every bundle', as
     const log = resolve(scratch, 'commands.log')
     const cache = resolve(scratch, 'cache')
     await mkdir(bin)
-    for (const tool of ['mise', 'npm']) {
-      await writeFile(resolve(bin, tool), '#!/bin/sh\nprintf "%s\\n" "$*" >> "$COMMAND_LOG"\nprintf "not installed\\n" >&2\nexit 1\n', { mode: 0o755 })
-    }
-    await writeFile(resolve(scratch, 'flow.mmd'), 'stateDiagram-v2\n  [*] --> Waiting\n  Waiting --> Ready : continue\n')
-    const env = { ...process.env, PATH: bin, COMMAND_LOG: log, XDG_CACHE_HOME: cache, TLA2TOOLS: '', JAVA: '', PSTACK_ALLOW_INSTALL: '' }
+    await writeFile(resolve(bin, 'mise'), '#!/bin/sh\nprintf "%s\\n" "$*" >> "$COMMAND_LOG"\nprintf "not installed\\n" >&2\nexit 1\n', { mode: 0o755 })
+    await writeFile(resolve(scratch, 'Flow.tla'), '---- MODULE Flow ----\nVARIABLE x\nInit == x = 0\nNext == x\' = 1 - x\n====\n')
+    await writeFile(resolve(scratch, 'Flow.cfg'), 'INIT Init\nNEXT Next\n')
+    const env = { ...process.env, PATH: `${bin}:${dirname(process.execPath)}:/usr/bin:/bin`, COMMAND_LOG: log, XDG_CACHE_HOME: cache, TLA2TOOLS: '', JAVA: '', PSTACK_ALLOW_INSTALL: '' }
     for (const harness of ['pstack', 'antigravity', 'opencode']) {
-      for (const command of ['from-chart', 'render']) {
-        const result = spawnSync(process.execPath, [resolve(root, harness, 'skills/statechart/scripts/statechart.mjs'), command, 'flow.mmd'], {
-          cwd: scratch, env, encoding: 'utf8', timeout: 10000,
-        })
-        assert.equal(result.status, 2, result.error?.message ?? result.stderr)
-        assert.match(result.stderr, /Automatic dependency installation is disabled/)
-      }
+      const result = spawnSync(resolve(root, harness, 'skills/statechart/scripts/statechart'), ['Flow.tla', '--out', `chart-${harness}`], {
+        cwd: scratch, env, encoding: 'utf8', timeout: 10000,
+      })
+      assert.equal(result.status, 2, result.error?.message ?? result.stderr)
+      assert.match(result.stderr, /automatic dependency installation is disabled/)
     }
+    assert.match(await readFile(log, 'utf8'), /^where\b/m)
     assert.doesNotMatch(await readFile(log, 'utf8'), /^install\b/m)
-    assert.ok(!(await readdir(scratch)).includes('cache'))
-    assert.ok(!(await readdir(scratch)).includes('flow.png'))
+    assert.deepEqual((await readdir(scratch)).filter(name => name.startsWith('chart-') || name === 'cache'), [])
   } finally {
     await rm(scratch, { recursive: true, force: true })
   }
