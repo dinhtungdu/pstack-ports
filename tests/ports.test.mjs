@@ -54,7 +54,7 @@ test('statechart refuses dependency installation by default in every bundle', as
     await writeFile(resolve(scratch, 'Flow.tla'), '---- MODULE Flow ----\nVARIABLE x\nInit == x = 0\nNext == x\' = 1 - x\n====\n')
     await writeFile(resolve(scratch, 'Flow.cfg'), 'INIT Init\nNEXT Next\n')
     const env = { ...process.env, PATH: `${bin}:${dirname(process.execPath)}:/usr/bin:/bin`, COMMAND_LOG: log, XDG_CACHE_HOME: cache, TLA2TOOLS: '', JAVA: '', PSTACK_ALLOW_INSTALL: '' }
-    for (const harness of ['pstack', 'antigravity', 'opencode']) {
+    for (const harness of ['antigravity', 'opencode']) {
       const result = spawnSync(resolve(root, harness, 'skills/statechart/scripts/statechart'), ['Flow.tla', '--out', `chart-${harness}`], {
         cwd: scratch, env, encoding: 'utf8', timeout: 10000,
       })

@@ -1,9 +1,8 @@
 # Pstack ports
 
 Pstack's 56 engineering skills and 23 playbooks, packaged for
-[Amp](pstack/README.md), [Antigravity](antigravity/README.md), and
-[OpenCode V2](opencode/README.md). Each port adds a harness adapter;
-Antigravity and OpenCode also add six native agent roles. No package dependencies
+[Antigravity](antigravity/README.md) and [OpenCode V2](opencode/README.md).
+Each port adds a harness adapter and six native agent roles. No package dependencies
 are needed to build or load these ports. Bundled helper scripts have their own
 runtime dependencies.
 
@@ -11,7 +10,6 @@ runtime dependencies.
 
 Clone this repository, then follow the port's README:
 
-- [Publish for Amp](pstack/README.md): bare-name skills in the personal Amp skills repository.
 - [Install Antigravity](antigravity/README.md): native directory plugin.
 - [Install OpenCode](opencode/README.md): native V2 JavaScript setup/transform plugin.
 
@@ -21,7 +19,7 @@ webhook automation, and Cursor model configuration do not execute in any port.
 
 ## Build and verify
 
-Use Node 22 or newer and Bun for the Amp tests. From this repository root:
+Use Node 22 or newer. From this repository root:
 
 ```sh
 npm run build
@@ -29,12 +27,11 @@ npm test
 npm run lint
 ```
 
-Edit `pstack/AMP.md`, `antigravity/ADAPTER.md`, `opencode/ADAPTER.md`, or `agents.json`, then rebuild.
+Edit `antigravity/ADAPTER.md`, `opencode/ADAPTER.md`, or `agents.json`, then rebuild.
 Do not edit generated skills or generated agent definitions. Tests verify body
 hashes, complete resources, model inheritance, and preservation of user settings.
-Amp gets skills only, not the six native agent definitions used by the other ports.
 
-`upstream/` is the maintained source. The build makes three self-contained bundles,
+`upstream/` is the maintained source. The build makes two self-contained bundles,
 without symlinks or runtime access to `upstream/`. Keeping a single runtime shared
 directory was rejected because copying an Antigravity plugin must not break it.
 The OpenCode plugin registers skills and agents in memory instead of copying
@@ -62,7 +59,7 @@ Import the reviewed staging copy, update catalog counts, then run the checks abo
 
 Weekly updates run through an Amp schedule in the
 [upstream maintenance thread](https://ampcode.com/threads/T-01a16cdc-2b09-73cf-8c64-b8c44c76673a).
-It reviews upstream changes, updates this checkout, rebuilds all three bundles,
+It reviews upstream changes, updates this checkout, rebuilds both bundles,
 and reports verification. It does not push, publish, or update the published skills.
 The local runner must be available for the scheduled run.
 
