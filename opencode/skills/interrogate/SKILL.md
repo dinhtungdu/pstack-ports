@@ -3,7 +3,7 @@ name: interrogate
 description: "Use for \"interrogate\", \"adversarial review\", \"multi-model review\", \"challenge this\", \"stress test this code\", \"find blind spots\", or \"tear this apart\". Adversaries try to break a change or design, and only findings proven by a run survive."
 ---
 
-**OpenCode port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
+**OpenCode port.** Load the pstack-harness-adapter skill before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
 
 
 # Interrogate

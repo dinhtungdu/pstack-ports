@@ -46,6 +46,9 @@ const roles = JSON.parse(await readFile(resolve(root, 'agents.json'), 'utf8'))
 const commentSicko = splitSkill(await readFile(resolve(root, 'upstream/comment-sicko.md'), 'utf8')).body.trimEnd()
 for (const harness of ['antigravity', 'opencode']) {
   const dest = resolve(root, harness)
+  const label = harness === 'opencode' ? 'OpenCode' : 'Antigravity'
+  const adapterId = 'pstack-harness-adapter'
+  const adapterDescription = `Required ${label} runtime rules for every pstack skill. Load it before following any pstack skill.`
   const adapter = await readFile(resolve(dest, 'ADAPTER.md'), 'utf8')
   await rm(resolve(dest, 'skills'), { recursive: true, force: true })
   await cp(resolve(root, 'upstream/skills'), resolve(dest, 'skills'), { recursive: true })
@@ -59,10 +62,13 @@ for (const harness of ['antigravity', 'opencode']) {
     const description = header.match(/^description: (.+)$/m)?.[1]
     if (!description) throw new Error(`Missing description: ${name}`)
     skillDescriptions[name] = description.startsWith('"') ? JSON.parse(description) : description
-    const preface = `**${harness === 'opencode' ? 'OpenCode' : 'Antigravity'} port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.\n\n`
+    const preface = `**${label} port.** Load the ${adapterId} skill before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.\n\n`
     await writeFile(resolve(base, 'SKILL.md'), `---\nname: ${name}\ndescription: ${description}\n---\n\n${preface}${body}`)
-    await writeFile(resolve(base, 'harness-adapter.md'), adapter)
   }
+  const adapterDir = resolve(dest, 'skills', adapterId)
+  await mkdir(adapterDir, { recursive: true })
+  await writeFile(resolve(adapterDir, 'SKILL.md'), `---\nname: ${adapterId}\ndescription: ${JSON.stringify(adapterDescription)}\n---\n\n${adapter}`)
+  skillDescriptions[adapterId] = adapterDescription
   for (const resource of ['LICENSE', 'docs', 'assets']) {
     await cp(resolve(root, 'upstream', resource), resolve(dest, resource), { recursive: true })
   }
@@ -70,7 +76,7 @@ for (const harness of ['antigravity', 'opencode']) {
   await mkdir(resolve(dest, 'agents'), { recursive: true })
   const definitions = {}
   for (const [name, role] of Object.entries(roles)) {
-    const prompt = `Read the bundled poteto-mode SKILL.md and its harness-adapter.md in full before working, including applicable principle skills. The parent must supply the absolute skill path. If unavailable, report the blocker; never search Cursor caches.\n\n${role.prompt}${name === 'comment-sicko' ? `\n${commentSicko}` : ''}\n`
+    const prompt = `Load the poteto-mode and ${adapterId} skills in full before working, including applicable principle skills. In a harness without skill loading, read both SKILL.md files from the absolute paths the parent supplies. If unavailable, report the blocker; never search Cursor caches.\n\n${role.prompt}${name === 'comment-sicko' ? `\n${commentSicko}` : ''}\n`
     definitions[name] = {
       description: role.description,
       mode: 'subagent',
@@ -101,4 +107,4 @@ for (const harness of ['antigravity', 'opencode']) {
   const defaults = Object.fromEntries(Object.keys(roles).map(name => [name, 'inherit']))
   await writeFile(resolve(dest, 'model-routing.defaults.json'), `${JSON.stringify(defaults, null, 2)}\n`)
 }
-console.log(`Built ${names.length} skills for Antigravity and OpenCode; ${Object.keys(roles).length} native agents each for Antigravity and OpenCode`)
+console.log(`Built ${names.length} pinned skills plus the harness adapter for Antigravity and OpenCode; ${Object.keys(roles).length} native agents each for Antigravity and OpenCode`)

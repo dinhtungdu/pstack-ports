@@ -3,7 +3,7 @@ name: principle-sequence-verifiable-units
 description: "Apply to multi-step work (sweeps, migrations, runs of similar edits) and to how you stack commits and PRs. Break work into small units that each end in a verifiable state, check each before the next, and order delivery so the sequence proves itself to a reviewer."
 ---
 
-**OpenCode port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
+**OpenCode port.** Load the pstack-harness-adapter skill before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
 
 
 # Sequence work into verifiable units

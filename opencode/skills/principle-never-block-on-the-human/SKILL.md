@@ -3,7 +3,7 @@ name: principle-never-block-on-the-human
 description: "Apply when tempted to ask 'should I do X?' on reversible work."
 ---
 
-**OpenCode port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
+**OpenCode port.** Load the pstack-harness-adapter skill before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
 
 
 # Never Block on the Human

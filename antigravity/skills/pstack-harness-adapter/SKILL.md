@@ -1,3 +1,8 @@
+---
+name: pstack-harness-adapter
+description: "Required Antigravity runtime rules for every pstack skill. Load it before following any pstack skill."
+---
+
 # Pstack on Antigravity
 
 This adapter replaces Cursor-specific mechanics in the unchanged skills and
@@ -6,11 +11,13 @@ surface's tool schemas, permissions, and user instructions take precedence.
 
 ## Skills and resources
 
-Read the bundled skill's SKILL.md, including this adapter, before following it.
-Use its discovered absolute path for sibling resources. Slash invocations in
-upstream text mean the corresponding installed skill, not shell commands.
-Pass the absolute poteto-mode skill path to every delegate. Bare skill names
-can collide with separately installed copies; select this plugin's path.
+Load the pstack-harness-adapter skill before any pstack skill; it is generated
+from this file. When skill loading is unavailable, read both SKILL.md files,
+including this adapter, from the absolute plugin paths. Use the discovered
+skill path for sibling resources. Slash invocations in upstream text mean the
+corresponding installed skill, not shell commands. Pass the plugin path to
+every delegate. Bare skill names can collide with separately installed copies;
+select this plugin's path.
 
 For skill discovery and authoring, translate `.cursor/skills/` to the workspace's
 `.agents/skills/` and `~/.cursor/skills/` to `~/.gemini/config/skills/`.
@@ -23,7 +30,8 @@ If none is available, use native tools and the documented SKILL.md format.
 Keep the requested draft, test, iterate, and description-optimization steps.
 Report any evaluation capability the active tools cannot provide.
 
-The 56 skill bodies and 23 playbooks are preserved. Cursor setup-pstack,
+The 56 pinned skill bodies and 23 playbooks are preserved, alongside the
+generated pstack-harness-adapter skill. Cursor setup-pstack,
 make-bot-ui, Benny automation, Custom Modes, and team-kit are not implemented.
 Skip their routes and installation links. Do not offer placeholder commands.
 For deslop, inspect the diff and run the project's lint. For control-ui or

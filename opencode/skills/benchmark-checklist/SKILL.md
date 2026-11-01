@@ -3,7 +3,7 @@ name: benchmark-checklist
 description: "Vet a perf measurement (limiter, tuning, limits, errors, repeatability, relevance, and whether the work happened) before you report or act on it. Use when you run a benchmark or report a speedup or regression you measured."
 ---
 
-**OpenCode port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
+**OpenCode port.** Load the pstack-harness-adapter skill before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
 
 
 # Benchmark checklist

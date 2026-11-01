@@ -7,13 +7,15 @@ the V2 setup/transform API, verified against 2.0.32 and 2.2.5. V1 is not support
 
 ## Skills and resources
 
-Load skills through the native skill tool by their installed names, such as
-poteto-mode. Confirm that the returned path belongs to this plugin. Bare names
-can collide with independently installed skills. Resolve references against the
-loaded skill directory, never against the target project's working directory.
-Use native file reads for sibling resources. Pass the absolute poteto-mode
-skill path to every delegate. A slash invocation means a skill, not a shell
-command. Use the native skill tool when a slash entry is unavailable.
+Load the pstack-harness-adapter skill first; it is generated from this file and
+replaces Cursor mechanics for every pstack skill. Then load skills through the
+native skill tool by their installed names, such as poteto-mode. Confirm that
+the returned path belongs to this plugin. Bare names can collide with
+independently installed skills. Resolve references against the loaded skill
+directory, never against the target project's working directory. Use native
+file reads for sibling resources. Pass the plugin path to every delegate so it
+can load both skills. A slash invocation means a skill, not a shell command.
+Use the native skill tool when a slash entry is unavailable.
 
 For skill discovery and authoring, translate `.cursor/skills/` to the workspace's
 `.agents/skills/` and `~/.cursor/skills/` to the OpenCode config directory's
@@ -27,7 +29,8 @@ If none is available, use native tools and the documented SKILL.md format.
 Keep the requested draft, test, iterate, and description-optimization steps.
 Report any evaluation capability the active tools cannot provide.
 
-The 56 skill bodies and 23 playbooks are preserved. Cursor setup-pstack,
+The 56 pinned skill bodies and 23 playbooks are preserved, alongside the
+generated pstack-harness-adapter skill. Cursor setup-pstack,
 make-bot-ui, Benny automation, Custom Modes, and team-kit are excluded.
 Skip their routes and upstream installation links. Do not invent placeholders.
 For deslop, inspect the diff and run the project's lint. For control-ui or
