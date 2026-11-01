@@ -3,7 +3,7 @@
 This adapter replaces Cursor-specific mechanics in the unchanged skills and
 playbooks. Preserve engineering checks, not Cursor API names. The active tool
 schemas, permissions, and user instructions take precedence. This plugin targets
-the V2 setup/transform API, verified against 2.0.32. V1 is not supported.
+the V2 setup/transform API, verified against 2.0.32 and 2.2.5. V1 is not supported.
 
 ## Skills and resources
 
@@ -51,13 +51,16 @@ work and the following installed agent names:
 - pstack-reviewer-alt: another independent review seat.
 - pstack-synthesizer: how, why, and reflect synthesis.
 
-Configure models through OpenCode's native agents.<name>.model setting using
-provider/model#variant IDs. Native configuration applies after plugin defaults,
-preserving model, system, disabled, and permissions overrides. Without a tool or
-agent model override, a child inherits the invoking parent's model.
-pstack-models.mdc and Cursor model tables do not configure OpenCode. Never translate Cursor slugs or
-silently choose a paid model. An unavailable model is a configuration error to
-report, not permission to pick a different provider.
+Defaults inherit the invoking parent's model. To route individual agents, write
+`~/.config/pstack-ports/opencode-models.json` with
+`node configure-models.mjs --set agent=provider/model#variant`; `inherit` keeps
+the parent model. The plugin applies those as plugin defaults, so native
+agents.<name>.model in opencode.json still wins. The settings file is validated
+at startup: an unknown agent or malformed model is a configuration error, not a
+silent fallback. pstack-models.mdc and Cursor model tables do not configure
+OpenCode. Never translate Cursor slugs or silently choose a paid model. An
+unavailable model is a configuration error to report, not permission to pick a
+different provider.
 
 For a review panel, create the required number of independent children. Alternate
 pstack-reviewer and pstack-reviewer-alt when configured with different models.

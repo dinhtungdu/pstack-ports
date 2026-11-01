@@ -18,14 +18,16 @@ Restart OpenCode, then ask it to load `poteto-mode` with the native skill tool.
 Skill names are unchanged from upstream. Remove conflicting independent copies
 only after checking their ownership. The plugin does not auto-load a workflow.
 
-This plugin targets the V2 setup/transform API, verified against 2.0.32. It
-default-exports a plugin definition and registers skills and agents through
+This plugin targets the V2 setup/transform API, verified against 2.0.32 and
+2.2.5. It default-exports a plugin definition and registers skills and agents through
 `ctx.skill.transform` and `ctx.agent.transform`. There is no V1 fallback.
 Do not add a separate skills path: the plugin registers all 56 bundled skills.
 
 ## Choose worker models
 
-Configure any of these native agents under `agents` in `opencode.json`:
+All six agents inherit the invoking parent's model by default. No paid model is
+selected by the plugin, and Cursor's pstack-models.mdc is ignored. Keep that
+default unless the user asks for routing. The agents are:
 
 - poteto-agent: implementation and swarm workers.
 - comment-sicko: report-only comment review.
@@ -33,10 +35,33 @@ Configure any of these native agents under `agents` in `opencode.json`:
 - pstack-reviewer and pstack-reviewer-alt: independent review seats.
 - pstack-synthesizer: evidence synthesis.
 
-Set an agent's `model` to an available `provider/model#variant` ID (variant optional).
-For a multi-model panel, configure the two reviewer seats with distinct models.
-An omitted model inherits the invoking parent's model. No paid model is selected
-by the plugin, and Cursor's pstack-models.mdc is ignored.
+For fine-grained routing, run the bundled configurator with one `agent=model`
+pair per `--set`:
+
+```sh
+node /absolute/path/to/pstack-ports/opencode/configure-models.mjs \
+  --set 'poteto-agent=provider/model#variant' \
+  --set 'pstack-reviewer=provider/other-model'
+```
+
+It writes `~/.config/pstack-ports/opencode-models.json`, honoring
+XDG_CONFIG_HOME, or an explicit settings-file argument. Each value is `inherit`
+(the default) or `provider/model#variant`. The script validates every agent name
+and model before writing, and the plugin rejects a malformed file instead of
+loading a partial routing table. Editing the JSON directly is equivalent:
+
+```json
+{
+  "poteto-agent": "provider/model#variant",
+  "pstack-reviewer": "provider/other-model",
+  "pstack-synthesizer": "inherit"
+}
+```
+
+Settings never modify `opencode.json`, so user-owned native configuration stays
+authoritative. An `agents.<name>.model` entry there overrides the settings file
+for that agent. For a multi-model panel, configure the two reviewer seats with
+distinct models.
 
 ```json
 {
@@ -72,6 +97,10 @@ Use the V2 executable bundled with your desktop app (or `opencode2` if installed
 A separate `opencode` on PATH may still be V1. Expect plugin `pstack` active,
 56 skills with `path` under this bundle, and six agents unless intentionally
 disabled. Reload the project location or restart OpenCode after editing assets.
+When you start an isolated or background server, OpenCode 2.2.5 reads
+`OPENCODE_PASSWORD` first and falls back to `OPENCODE_SERVER_PASSWORD`. An
+inherited `OPENCODE_PASSWORD` therefore overrides the legacy name, so set the
+preferred one explicitly and clear inherited values in test harnesses.
 Check each configured model before requesting a paid multi-model run. The native
 `subagent` tool takes `agent`, `description`, and `prompt`; optional `sessionID`
 resumes a child, and `background` enables completion notification.

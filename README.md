@@ -88,9 +88,14 @@ Guidelines consulted on 2026-10-19:
 Antigravity CLI 1.4.1 passes strict plugin validation and discovers all 56 skills
 and six agents after an isolated native install. Its validator also accepts
 installed agents after applying flash and pro routing settings. These checks
-do not invoke a model or prove App delegation. OpenCode V2 2.0.32 loads all
-56 skills and six agents in an isolated server. Its native configuration keeps
-model, variant, system prompt, disabled-agent, and permission overrides.
+do not invoke a model or prove App delegation. OpenCode V2 2.0.32 and 2.2.5 load
+all 56 skills and six agents in an isolated server. Their native configuration
+keeps model, variant, system prompt, disabled-agent, and permission overrides.
 Run this check with `OPENCODE_V2_BIN=/absolute/path/to/v2/opencode npm test`.
-OpenCode model calls and paid provider routing remain unverified.
-Configuration checks alone do not prove model-driven workflows.
+On 2.2.5, a native per-agent model and variant override were applied to subagent
+session records, so the override mechanism was observed end to end. Plugin and
+settings-file routing were also observed: routed agents reported the configured
+model, and native per-agent configuration still won. Out of the box the port
+writes no model defaults; agents inherit the invoking parent's model until a
+user opts into routing. Paid provider routing remains unverified. Configuration
+checks alone do not prove model-driven workflows.
