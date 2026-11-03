@@ -15,8 +15,9 @@ Load the pstack-harness-adapter skill before any pstack skill; it is generated
 from this file. When skill loading is unavailable, read both SKILL.md files,
 including this adapter, from the absolute plugin paths. Use the discovered
 skill path for sibling resources. Slash invocations in upstream text mean the
-corresponding installed skill, not shell commands. Pass the plugin path to
-every delegate. Bare skill names can collide with separately installed copies;
+corresponding installed skill, not shell commands. Pass the absolute paths of
+this plugin's poteto-mode and pstack-harness-adapter SKILL.md files to every
+delegate. Bare skill names can collide with separately installed copies;
 select this plugin's path.
 
 For skill discovery and authoring, translate `.cursor/skills/` to the workspace's
