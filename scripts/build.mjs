@@ -97,9 +97,8 @@ for (const harness of ['antigravity', 'opencode']) {
     await writeFile(resolve(dest, 'agents.json'), `${JSON.stringify(definitions, null, 2)}\n`)
     await writeFile(resolve(dest, 'skills.json'), `${JSON.stringify(skillDescriptions, null, 2)}\n`)
     await rm(resolve(dest, 'agents'), { recursive: true })
-  } else {
-    const defaults = Object.fromEntries(Object.keys(roles).map(name => [name, 'inherit']))
-    await writeFile(resolve(dest, 'model-routing.defaults.json'), `${JSON.stringify(defaults, null, 2)}\n`)
   }
+  const defaults = Object.fromEntries(Object.keys(roles).map(name => [name, 'inherit']))
+  await writeFile(resolve(dest, 'model-routing.defaults.json'), `${JSON.stringify(defaults, null, 2)}\n`)
 }
 console.log(`Built ${names.length} skills for Antigravity and OpenCode; ${Object.keys(roles).length} native agents each for Antigravity and OpenCode`)

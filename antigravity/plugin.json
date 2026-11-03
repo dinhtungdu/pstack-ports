@@ -1,5 +1,6 @@
 {
   "$schema": "https://antigravity.google/schemas/v1/plugin.json",
   "name": "pstack",
-  "description": "Pstack engineering workflows, principles, and native subagents for Antigravity."
+  "description": "Pstack engineering workflows, principles, and native subagents for Antigravity.",
+  "logo": "assets/logo.png"
 }

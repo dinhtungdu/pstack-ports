@@ -71,7 +71,7 @@ test('statechart refuses dependency installation by default in every bundle', as
 
 test('Antigravity exposes native inherited-model agents with documented tool names', async () => {
   const manifest = JSON.parse(await read('antigravity/plugin.json'))
-  assert.deepEqual(Object.keys(manifest).sort(), ['$schema', 'description', 'name'])
+  assert.deepEqual(Object.keys(manifest).sort(), ['$schema', 'description', 'logo', 'name'])
   assert.equal(manifest.name, 'pstack')
   assert.deepEqual((await readdir(resolve(root, 'antigravity/agents'))).sort(), Object.keys(roles).map(name => `${name}.md`).sort())
   for (const [name, role] of Object.entries(roles)) {
@@ -160,33 +160,131 @@ test('Antigravity settings default to inherit, survive reinstall, and change onl
   }
 })
 
-test('OpenCode V2 registers complete skills and inherited-model subagents', async () => {
-  const skills = new Map()
-  const agents = new Map()
-  assert.equal(PstackPlugin.id, 'pstack')
-  await PstackPlugin.setup({
-    skill: { transform: async transform => transform({ add: skill => skills.set(skill.id, skill) }) },
-    agent: { transform: async transform => transform({ update: (id, update) => {
-      const agent = { permissions: [] }
-      update(agent)
-      agents.set(id, agent)
-    } }) },
-  })
-  assert.deepEqual([...skills.keys()].sort(), names)
-  for (const [id, skill] of skills) {
-    assert.equal(skill.path, resolve(root, 'opencode/skills', id, 'SKILL.md'))
-    const text = await read(`opencode/skills/${id}/SKILL.md`)
-    assert.equal(skill.content, text.slice(text.indexOf('\n---\n') + 5))
-    assert.ok(skill.description.length > 0)
+test('OpenCode V2 registers complete skills and inheritable subagents with optional model routing', async () => {
+  await mkdir(resolve(root, '.amp/in'), { recursive: true })
+  const scratch = await mkdtemp(resolve(root, '.amp/in/opencode-routing-'))
+  const configRoot = resolve(scratch, 'config')
+  const settings = resolve(configRoot, 'pstack-ports/opencode-models.json')
+  const previous = process.env.XDG_CONFIG_HOME
+  process.env.XDG_CONFIG_HOME = configRoot
+  try {
+    const setup = async () => {
+      const skills = new Map()
+      const agents = new Map()
+      await PstackPlugin.setup({
+        skill: { transform: async transform => transform({ add: skill => skills.set(skill.id, skill) }) },
+        agent: { transform: async transform => transform({ update: (id, update) => {
+          const agent = { permissions: [] }
+          update(agent)
+          agents.set(id, agent)
+        } }) },
+      })
+      return { skills, agents }
+    }
+    const assertAgents = (agents, routed) => {
+      assert.equal(agents.size, 6)
+      for (const [name, role] of Object.entries(roles)) {
+        const agent = agents.get(name)
+        assert.equal(agent.mode, 'subagent')
+        assert.deepEqual(agent.model, routed[name], name)
+        assert.ok(agent.system.includes(role.prompt))
+        assert.deepEqual(agent.permissions, role.reportOnly ? [{ action: 'edit', resource: '*', effect: 'deny' }] : [])
+      }
+    }
+    const { skills, agents } = await setup()
+    assert.equal(PstackPlugin.id, 'pstack')
+    assert.deepEqual([...skills.keys()].sort(), names)
+    for (const [id, skill] of skills) {
+      assert.equal(skill.path, resolve(root, 'opencode/skills', id, 'SKILL.md'))
+      const text = await read(`opencode/skills/${id}/SKILL.md`)
+      assert.equal(skill.content, text.slice(text.indexOf('\n---\n') + 5))
+      assert.ok(skill.description.length > 0)
+    }
+    assert.match(skills.get('how').description, /^Use for "how does X work"/)
+    assertAgents(agents, {})
+
+    await mkdir(dirname(settings), { recursive: true })
+    await writeFile(settings, JSON.stringify({
+      'poteto-agent': 'opencode/glm-5.3-flash-free#high',
+      'pstack-reviewer': 'local/reviewer-b',
+      'pstack-synthesizer': 'inherit',
+    }))
+    assertAgents((await setup()).agents, {
+      'poteto-agent': { providerID: 'opencode', id: 'glm-5.3-flash-free', variant: 'high' },
+      'pstack-reviewer': { providerID: 'local', id: 'reviewer-b' },
+    })
+
+    for (const invalid of ['{invalid', '[]', JSON.stringify({ 'unknown-agent': 'inherit' }), JSON.stringify({ 'poteto-agent': 'glm-5.3' })]) {
+      await writeFile(settings, invalid)
+      await assert.rejects(setup(), /Invalid JSON|JSON object|Unknown pstack agent|Invalid model/)
+    }
+  } finally {
+    if (previous === undefined) delete process.env.XDG_CONFIG_HOME
+    else process.env.XDG_CONFIG_HOME = previous
+    await rm(scratch, { recursive: true, force: true })
   }
-  assert.match(skills.get('how').description, /^Use for "how does X work"/)
-  assert.equal(agents.size, 6)
-  for (const [name, role] of Object.entries(roles)) {
-    const agent = agents.get(name)
-    assert.equal(agent.mode, 'subagent')
-    assert.equal(agent.model, undefined)
-    assert.ok(agent.system.includes(role.prompt))
-    assert.deepEqual(agent.permissions, role.reportOnly ? [{ action: 'edit', resource: '*', effect: 'deny' }] : [])
+})
+
+test('OpenCode model settings default to inherit and validate before writing', async () => {
+  await mkdir(resolve(root, '.amp/in'), { recursive: true })
+  const scratch = await mkdtemp(resolve(root, '.amp/in/opencode-configure-'))
+  try {
+    const target = resolve(scratch, 'installed-pstack')
+    await mkdir(target, { recursive: true })
+    for (const file of ['agents.json', 'configure-models.mjs', 'model-routing.defaults.json']) {
+      await cp(resolve(root, 'opencode', file), resolve(target, file))
+    }
+    const configRoot = resolve(scratch, 'user-config')
+    const settings = resolve(configRoot, 'pstack-ports/opencode-models.json')
+    const run = (...args) => spawnSync(process.execPath, [resolve(target, 'configure-models.mjs'), ...args], {
+      env: { ...process.env, XDG_CONFIG_HOME: configRoot }, encoding: 'utf8', timeout: 10000,
+    })
+    const defaults = Object.fromEntries(Object.keys(roles).map(name => [name, 'inherit']))
+    assert.deepEqual(JSON.parse(await read('opencode/model-routing.defaults.json')), defaults)
+    assert.match(run('--help').stdout, /Usage: node configure-models\.mjs/)
+
+    const created = run()
+    assert.equal(created.status, 0, created.stderr)
+    assert.match(created.stdout, /Created settings/)
+    assert.match(created.stdout, /0 routed, 6 inheriting/)
+    assert.deepEqual(JSON.parse(await readFile(settings, 'utf8')), defaults)
+
+    const set = run('--set', 'poteto-agent=opencode/glm-5.3-flash-free#high', '--set', 'pstack-reviewer=local/reviewer-b')
+    assert.equal(set.status, 0, set.stderr)
+    assert.match(set.stdout, /2 routed, 4 inheriting/)
+    assert.deepEqual(JSON.parse(await readFile(settings, 'utf8')), {
+      ...defaults,
+      'poteto-agent': 'opencode/glm-5.3-flash-free#high',
+      'pstack-reviewer': 'local/reviewer-b',
+    })
+
+    const snapshot = await readFile(settings, 'utf8')
+    for (const [args, message] of [
+      [['--set', 'unknown-agent=opencode/x'], /Unknown pstack agent/],
+      [['--set', 'pstack-reviewer=gemini-pro'], /Invalid model for pstack-reviewer/],
+      [['--set', 'pstack-reviewer'], /--set requires agent=model/],
+      [['--set', '=opencode/x'], /--set requires agent=model/],
+      [['--bogus'], /Unknown option/],
+      [['one.json', 'two.json'], /at most one settings-file/],
+    ]) {
+      const result = run(...args)
+      assert.equal(result.status, 1, args.join(' '))
+      assert.match(result.stderr, message)
+      assert.equal(await readFile(settings, 'utf8'), snapshot)
+    }
+
+    await writeFile(settings, '{invalid JSON')
+    const invalidJson = run()
+    assert.equal(invalidJson.status, 1)
+    assert.match(invalidJson.stderr, /Invalid JSON/)
+    assert.equal(await readFile(settings, 'utf8'), '{invalid JSON')
+
+    const custom = resolve(scratch, 'custom-settings.json')
+    assert.equal(run(custom, '--set', 'comment-sicko=inherit').status, 0)
+    assert.deepEqual(JSON.parse(await readFile(custom, 'utf8')), defaults)
+    assert.equal(await readFile(settings, 'utf8'), '{invalid JSON')
+  } finally {
+    await rm(scratch, { recursive: true, force: true })
   }
 })
 
@@ -255,6 +353,11 @@ test('OpenCode V2 discovers the bundle and applies native user overrides through
       OPENCODE_DISABLE_MODELS_FETCH: 'true',
       OPENCODE_CONFIG_DIR: resolve(scratch, 'config/opencode'),
       OPENCODE_CONFIG_CONTENT: '{}',
+      // OpenCode 2.2.5 prefers OPENCODE_PASSWORD and only then falls back to
+      // OPENCODE_SERVER_PASSWORD, so an inherited OPENCODE_PASSWORD wins over
+      // the legacy name alone. Set the preferred name explicitly and keep the
+      // legacy one for older 2.0.x builds.
+      OPENCODE_PASSWORD: 'pstack-isolated-test',
       OPENCODE_SERVER_PASSWORD: 'pstack-isolated-test',
     }
     await mkdir(env.HOME, { recursive: true })
@@ -310,11 +413,28 @@ test('OpenCode V2 discovers the bundle and applies native user overrides through
       assert.deepEqual(agent.permissions.filter(rule => rule.action === 'edit'), role.reportOnly ? [{ action: 'edit', resource: '*', effect: 'deny' }] : [])
     }
 
+    // Model settings live outside the user config so they survive config edits.
+    const settings = resolve(env.XDG_CONFIG_HOME, 'pstack-ports/opencode-models.json')
+    await mkdir(dirname(settings), { recursive: true })
+    await writeFile(settings, JSON.stringify({
+      'poteto-agent': 'local/routed-worker#high',
+      'comment-sicko': 'local/routed-sicko',
+      'pstack-researcher': 'inherit',
+    }))
+    await request('location/reload', 'POST')
+    await ready()
+    const routed = await request('agent')
+    assert.deepEqual(routed.find(agent => agent.id === 'poteto-agent').model, { providerID: 'local', id: 'routed-worker', variant: 'high' })
+    assert.deepEqual(routed.find(agent => agent.id === 'comment-sicko').model, { providerID: 'local', id: 'routed-sicko' })
+    assert.equal(routed.find(agent => agent.id === 'pstack-researcher').model, undefined)
+    assert.equal(routed.find(agent => agent.id === 'pstack-synthesizer').model, undefined)
+
     const permissions = [{ action: 'edit', resource: '*.md', effect: 'ask' }, { action: 'shell', resource: '*', effect: 'deny' }]
     config.agents = {
       existing: { model: 'local/existing' },
       'pstack-reviewer': { model: 'local/reviewer-b#high', system: 'User-owned instructions', permissions },
       'pstack-reviewer-alt': { disabled: true },
+      'poteto-agent': { model: 'local/winner#max' },
     }
     await writeFile(configPath, JSON.stringify(config))
     await request('location/reload', 'POST')
@@ -326,6 +446,9 @@ test('OpenCode V2 discovers the bundle and applies native user overrides through
     assert.deepEqual(reviewer.permissions.filter(rule => ['edit', 'shell'].includes(rule.action)), [{ action: 'edit', resource: '*', effect: 'deny' }, ...permissions])
     assert.ok(!overridden.some(agent => agent.id === 'pstack-reviewer-alt'))
     assert.deepEqual(overridden.find(agent => agent.id === 'existing').model, { providerID: 'local', id: 'existing' })
+    // Native user config wins over settings, and settings still apply to other agents.
+    assert.deepEqual(overridden.find(agent => agent.id === 'poteto-agent').model, { providerID: 'local', id: 'winner', variant: 'max' })
+    assert.deepEqual(overridden.find(agent => agent.id === 'comment-sicko').model, { providerID: 'local', id: 'routed-sicko' })
   } finally {
     if (server && server.exitCode === null && server.signalCode === null) {
       const exited = new Promise(resolve => server.once('exit', resolve))
