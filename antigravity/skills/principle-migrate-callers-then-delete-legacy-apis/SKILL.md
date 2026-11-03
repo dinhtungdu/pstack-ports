@@ -3,7 +3,7 @@ name: principle-migrate-callers-then-delete-legacy-apis
 description: "Apply when introducing a new internal API while old callers still exist. Migrate callers and delete the old API in the same wave instead of preserving compatibility layers."
 ---
 
-**Antigravity port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
+**Antigravity port.** Load the pstack-harness-adapter skill before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
 
 
 # Migrate Callers Then Delete Legacy APIs

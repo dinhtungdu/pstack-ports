@@ -3,7 +3,7 @@ name: typescript-best-practices
 description: TypeScript best practices. Use when reading or editing any .ts or .tsx file.
 ---
 
-**OpenCode port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
+**OpenCode port.** Load the pstack-harness-adapter skill before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
 
 
 # TypeScript best practices

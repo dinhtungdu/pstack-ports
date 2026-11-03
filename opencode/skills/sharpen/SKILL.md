@@ -3,7 +3,7 @@ name: sharpen
 description: "Make a task deeper, not bigger, then rewrite the prompt. Use for /sharpen."
 ---
 
-**OpenCode port.** Read [harness-adapter.md](harness-adapter.md) before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
+**OpenCode port.** Load the pstack-harness-adapter skill before following this skill. It replaces Cursor tool, model, history, scheduling, and authorization instructions below.
 
 
 I want a deeper version of this task, not a bigger one. Before rewriting it, do four things:

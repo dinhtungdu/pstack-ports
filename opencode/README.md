@@ -21,7 +21,8 @@ only after checking their ownership. The plugin does not auto-load a workflow.
 This plugin targets the V2 setup/transform API, verified against 2.0.32 and
 2.2.5. It default-exports a plugin definition and registers skills and agents through
 `ctx.skill.transform` and `ctx.agent.transform`. There is no V1 fallback.
-Do not add a separate skills path: the plugin registers all 56 bundled skills.
+Do not add a separate skills path: the plugin registers all 56 pinned skills
+plus the generated pstack-harness-adapter skill.
 
 ## Choose worker models
 
@@ -95,7 +96,7 @@ opencode api GET '/api/agent?location[directory]=/absolute/project/path'
 
 Use the V2 executable bundled with your desktop app (or `opencode2` if installed).
 A separate `opencode` on PATH may still be V1. Expect plugin `pstack` active,
-56 skills with `path` under this bundle, and six agents unless intentionally
+57 skills with `path` under this bundle, and six agents unless intentionally
 disabled. Reload the project location or restart OpenCode after editing assets.
 When you start an isolated or background server, OpenCode 2.2.5 reads
 `OPENCODE_PASSWORD` first and falls back to `OPENCODE_SERVER_PASSWORD`. An

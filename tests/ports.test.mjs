@@ -12,24 +12,33 @@ const read = path => readFile(resolve(root, path), 'utf8')
 const hashes = JSON.parse(await read('upstream-bodies.json'))
 const names = Object.keys(hashes).sort()
 const roles = JSON.parse(await read('agents.json'))
+const adapterId = 'pstack-harness-adapter'
+const skillIds = [...names, adapterId].sort()
 
-test('both bundles preserve all 56 pinned bodies, adapters, and complete skill resources', async () => {
+test('both bundles preserve all 56 pinned bodies, the harness adapter skill, and complete skill resources', async () => {
   assert.equal(names.length, 56)
   const sourceFiles = (await readdir(resolve(root, 'upstream/skills'), { recursive: true, withFileTypes: true }))
     .filter(entry => entry.isFile())
     .map(entry => resolve(entry.parentPath, entry.name).slice(resolve(root, 'upstream/skills').length + 1))
   assert.equal(sourceFiles.filter(path => path.startsWith('poteto-mode/playbooks/') && path.endsWith('.md')).length, 23)
   for (const harness of ['antigravity', 'opencode']) {
-    assert.deepEqual((await readdir(resolve(root, harness, 'skills'))).sort(), names)
+    assert.deepEqual((await readdir(resolve(root, harness, 'skills'))).sort(), skillIds)
     const adapter = await read(`${harness}/ADAPTER.md`)
+    const adapterSkill = await read(`${harness}/skills/${adapterId}/SKILL.md`)
+    const [frontmatter] = adapterSkill.match(/^---\n[\s\S]*?\n---\n\n/)
+    assert.match(frontmatter, new RegExp(`^---\\nname: ${adapterId}\\ndescription: .+\\n---\\n\\n$`))
+    assert.equal(adapterSkill.slice(frontmatter.length), adapter)
     for (const name of names) {
       const text = await read(`${harness}/skills/${name}/SKILL.md`)
       const body = text.split('instructions below.\n\n')[1]
       assert.ok(body, `${harness}/${name}: missing adapter preface`)
       assert.equal(createHash('sha256').update(body).digest('hex'), hashes[name], `${harness}/${name}`)
       assert.match(text, new RegExp(`^---\nname: ${name}\ndescription: .+\n`))
-      assert.equal(await read(`${harness}/skills/${name}/harness-adapter.md`), adapter)
+      assert.match(text, new RegExp(`Load the ${adapterId} skill before following this skill`))
     }
+    const leftovers = (await readdir(resolve(root, harness, 'skills'), { recursive: true }))
+      .filter(path => path.endsWith('harness-adapter.md'))
+    assert.deepEqual(leftovers, [], `${harness}: per-skill adapter copies remain`)
     for (const path of sourceFiles.filter(path => !path.endsWith('/SKILL.md'))) {
       assert.deepEqual(
         await readFile(resolve(root, harness, 'skills', path)),
@@ -193,7 +202,7 @@ test('OpenCode V2 registers complete skills and inheritable subagents with optio
     }
     const { skills, agents } = await setup()
     assert.equal(PstackPlugin.id, 'pstack')
-    assert.deepEqual([...skills.keys()].sort(), names)
+    assert.deepEqual([...skills.keys()].sort(), skillIds)
     for (const [id, skill] of skills) {
       assert.equal(skill.path, resolve(root, 'opencode/skills', id, 'SKILL.md'))
       const text = await read(`opencode/skills/${id}/SKILL.md`)
@@ -303,12 +312,12 @@ test('agy validates, installs, discovers, and accepts routing on an isolated nat
     }
     const validation = JSON.parse(run('plugin', 'validate', resolve(root, 'antigravity'), '--strict', '--json'))
     assert.deepEqual(validation.findings, [])
-    assert.equal(validation.components.skills, names.length)
+    assert.equal(validation.components.skills, skillIds.length)
     assert.equal(validation.components.agents, 6)
     run('plugin', 'install', resolve(root, 'antigravity'))
     const installed = JSON.parse(run('plugin', 'list', '--json')).find(plugin => plugin.name === 'pstack')
     assert.equal(installed.enabled, true)
-    assert.deepEqual(installed.skills.sort(), names)
+    assert.deepEqual(installed.skills.sort(), skillIds)
     assert.deepEqual(installed.agents.sort(), Object.keys(roles).sort())
     assert.ok((await realpath(installed.path)).startsWith(home + '/'))
 
@@ -401,8 +410,9 @@ test('OpenCode V2 discovers the bundle and applies native user overrides through
     })
     await ready()
     const bundled = (await request('skill')).filter(skill => skill.path.startsWith(resolve(root, 'opencode/skills') + '/'))
-    assert.deepEqual(bundled.map(skill => skill.name).sort(), names)
-    assert.ok(bundled.every(skill => skill.content.includes('harness-adapter.md')))
+    assert.deepEqual(bundled.map(skill => skill.name).sort(), skillIds)
+    assert.ok(bundled.every(skill => skill.content.includes(adapterId)))
+    assert.ok(bundled.find(skill => skill.name === adapterId).content.includes('Pstack on OpenCode'))
     const agents = await request('agent')
     for (const [name, role] of Object.entries(roles)) {
       const agent = agents.find(agent => agent.id === name)

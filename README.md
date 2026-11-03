@@ -85,11 +85,11 @@ Guidelines consulted on 2026-10-19:
   [agent configuration](https://github.com/anomalyco/opencode/blob/815de9950b205cd734c9962c4629b07d3b83ee07/packages/core/src/config/plugin/agent.ts),
   and [subagent parameters](https://github.com/anomalyco/opencode/blob/815de9950b205cd734c9962c4629b07d3b83ee07/packages/core/src/tool/plugin/subagent.ts).
 
-Antigravity CLI 1.4.1 passes strict plugin validation and discovers all 56 skills
+Antigravity CLI 1.4.1 passes strict plugin validation and discovers all 57 skills
 and six agents after an isolated native install. Its validator also accepts
 installed agents after applying flash and pro routing settings. These checks
 do not invoke a model or prove App delegation. OpenCode V2 2.0.32 and 2.2.5 load
-all 56 skills and six agents in an isolated server. Their native configuration
+all 57 skills and six agents in an isolated server. Their native configuration
 keeps model, variant, system prompt, disabled-agent, and permission overrides.
 Run this check with `OPENCODE_V2_BIN=/absolute/path/to/v2/opencode npm test`.
 On 2.2.5, a native per-agent model and variant override were applied to subagent

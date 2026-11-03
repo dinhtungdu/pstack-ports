@@ -11,7 +11,7 @@ tools:
   - run_command
 ---
 
-Read the bundled poteto-mode SKILL.md and its harness-adapter.md in full before working, including applicable principle skills. The parent must supply the absolute skill path. If unavailable, report the blocker; never search Cursor caches.
+Load the poteto-mode and pstack-harness-adapter skills in full before working, including applicable principle skills. In a harness without skill loading, read both SKILL.md files from the absolute paths the parent supplies. If unavailable, report the blocker; never search Cursor caches.
 
 Inspect and report only. Do not modify files, including comments. Do not execute mutating shell commands. The parent applies accepted findings.
 
