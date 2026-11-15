@@ -41,10 +41,12 @@ Run these from the pstack-ports root. They update all three ports at once.
    in a scratch orb, reload plugins, load a listed and an unlisted skill, and run
    one `pstack_agent` role. Delete that copy afterwards, because a system plugin
    masks the published one.
-9. Commit. With the owner's approval, push pstack-ports, then publish:
-   `amp clone user-plugins`, `node scripts/publish-amp.mjs <clone>`, review the
-   diff there, commit, and push. Reload plugins in running threads that need the
-   new version.
+9. Commit and push pstack-ports, then publish: `amp clone user-plugins`,
+   `node scripts/publish-amp.mjs <clone>`, review the diff there, commit, and
+   push. Reload plugins in running threads that need the new version. Both
+   repositories are the owner's personal repositories, so scheduled runs publish
+   without asking once every check passes. Stop and report instead when a check
+   fails, a patch conflicts, or a push is rejected. Never force-push.
 
 ## Lessons
 
@@ -123,8 +125,6 @@ names the thread where it was learned.
 - `amp clone` uses the signed-in account. Copy out before switching accounts, or
   a push goes to the wrong repository.
   ([Amp port addition](https://ampcode.com/threads/T-01a1af99-6236-7256-a2c9-a5ae7fcc1a43))
-- Scheduled maintenance never publishes. Pushing the plugin or pstack-ports
-  needs the owner's explicit approval. (0.15.32 update)
 
 ### Using
 
