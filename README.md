@@ -65,8 +65,8 @@ The local runner must be available for the scheduled run.
 
 ## Sources and limits
 
-Based on Lauren Tan's pstack 0.15.36 at
-[cursor/plugins revision c742dd6](https://github.com/cursor/plugins/tree/c742dd61706fbacc1b95f1a20b7b988cf096ce6c/pstack),
+Based on Lauren Tan's pstack 0.15.42 at
+[cursor/plugins revision bf0c7cd](https://github.com/cursor/plugins/tree/bf0c7cd80abdbf7fe47b634978a7d1b4071f71a7/pstack),
 seeded from the reviewed Amp port at
 [amp-plugins revision 620fcf1](https://github.com/dinhtungdu/amp-plugins/commit/620fcf1420fb97c3f5685f6124de8e9136a222d5).
 The skill bodies remain verbatim. Resources retain that port's script safety

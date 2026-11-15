@@ -1,6 +1,6 @@
 ---
 name: pstack-synthesizer
-description: "Report-only synthesis of investigator and reviewer evidence for how, why, and reflect."
+description: "Report-only synthesis of investigator and reviewer evidence for reflect."
 mainAgent: false
 subagent: true
 model: inherit

@@ -48,10 +48,10 @@ Select the bundled native agent for the upstream role:
 
 - poteto-agent: implementation, refactoring, hillclimb, and swarm workers.
 - comment-sicko: no-comments review, report only.
-- pstack-researcher: how explorers, why investigators, recall, and source waves.
-- pstack-reviewer: how explanation, arena judges, interrogate and reflect reviewers.
+- pstack-researcher: the how explorer, recall, and source waves.
+- pstack-reviewer: arena judges, interrogate and reflect reviewers.
 - pstack-reviewer-alt: another independent review seat.
-- pstack-synthesizer: how, why, and reflect synthesis.
+- pstack-synthesizer: reflect synthesis.
 
 Use a fresh child for new work. A child starts without the parent's history.
 Supply the consolidated brief, exact revision, paths, rubric, and required

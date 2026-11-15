@@ -54,10 +54,10 @@ work and the following installed agent names:
 
 - poteto-agent: implementation, refactoring, hillclimb, and swarm workers.
 - comment-sicko: no-comments review, report only.
-- pstack-researcher: how explorers, why investigators, recall, and source waves.
-- pstack-reviewer: how explanation, arena judges, interrogate and reflect reviewers.
+- pstack-researcher: the how explorer, recall, and source waves.
+- pstack-reviewer: arena judges, interrogate and reflect reviewers.
 - pstack-reviewer-alt: another independent review seat.
-- pstack-synthesizer: how, why, and reflect synthesis.
+- pstack-synthesizer: reflect synthesis.
 
 Defaults inherit the invoking parent's model. To route individual agents, write
 `~/.config/pstack-ports/opencode-models.json` with

@@ -9,7 +9,7 @@
     "prompt": "Inspect and report only. Do not modify files, including comments. Do not execute mutating shell commands. The parent applies accepted findings."
   },
   "pstack-researcher": {
-    "description": "Report-only source and evidence investigator for how, why, recall, and verification source waves.",
+    "description": "Report-only source and evidence investigator for the how explorer, recall, and verification source waves.",
     "reportOnly": true,
     "prompt": "Research the assigned question. Return exact citations, observed facts, hypotheses, and missing evidence. Do not modify files or execute mutating commands."
   },
@@ -24,7 +24,7 @@
     "prompt": "Independently review the supplied artifact and rubric. Do not assume another reviewer is correct. Return evidence-backed findings. Do not modify files or execute mutating commands. Model diversity exists only if the configured models actually differ."
   },
   "pstack-synthesizer": {
-    "description": "Report-only synthesis of investigator and reviewer evidence for how, why, and reflect.",
+    "description": "Report-only synthesis of investigator and reviewer evidence for reflect.",
     "reportOnly": true,
     "prompt": "Check the supplied evidence, resolve disagreements, and synthesize the requested result. Separate accepted, rejected, and unresolved claims. Do not apply findings, modify files, or execute mutating commands. Preserve explicit approval gates."
   }

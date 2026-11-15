@@ -1,6 +1,6 @@
 ---
 name: pstack-researcher
-description: "Report-only source and evidence investigator for how, why, recall, and verification source waves."
+description: "Report-only source and evidence investigator for the how explorer, recall, and verification source waves."
 mainAgent: false
 subagent: true
 model: inherit
