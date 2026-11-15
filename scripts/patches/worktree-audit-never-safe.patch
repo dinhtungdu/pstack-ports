@@ -1,0 +1,64 @@
+--- a/skills/poteto-mode/scripts/worktree-audit.sh
++++ b/skills/poteto-mode/scripts/worktree-audit.sh
+@@ -1,7 +1,7 @@
+ #!/usr/bin/env bash
+-# Read-only worktree prune audit. Classifies every git worktree by size, merge
+-# state, uncommitted work, remote/PR state, and the most recent chat that
+-# operated in it. Emits a table sorted by size with a suggested bucket. Never
++# Non-deleting worktree audit. Fetches refs and queries the forge. Reports size, merge
++# state, uncommitted work, remote/PR state, and unknown Amp chat activity.
++# Emits a table sorted by size with a suggested bucket. Never
+ # deletes anything; deletion stays a human-gated step in the playbook.
+ #
+ # Usage: worktree-audit.sh [-b|--base <ref>] [repo-path]
+@@ -47,14 +47,6 @@
+ esac
+ git rev-parse --verify --quiet "$base^{commit}" >/dev/null 2>&1 || { echo "error: base ref not found: $base" >&2; exit 1; }
+ 
+-# GNU coreutils (Linux, Homebrew gnubin) reads `stat -f` as file system status
+-# and `date -r` as a file, so pick the stat and date flags once.
+-if stat -c %Y / >/dev/null 2>&1; then
+-	stat_fmt=(-c '%Y %n'); fmt_day() { date -d "@$1" '+%Y-%m-%d'; }
+-else
+-	stat_fmt=(-f '%m %N'); fmt_day() { date -r "$1" '+%Y-%m-%d'; }
+-fi
+-
+ # PR state by branch, fetched once as [{number, state, head}] with a lowercase
+ # state. Origin when its CLI can read this repo's PRs, otherwise gh. Empty when
+ # neither can.
+@@ -69,9 +61,7 @@
+ fi
+ [ -s "$prs" ] || echo "[]" > "$prs"
+ 
+-# Transcripts dir: ~/.cursor/projects/<slugified-repo-path>/agent-transcripts.
+-slug=$(printf '%s' "$main_wt" | sed 's#^/##; s#/#-#g')
+-transcripts="$HOME/.cursor/projects/$slug/agent-transcripts"
++# Amp thread activity is not available from a local transcript directory.
+ now=$(date +%s)
+ 
+ echo "# base: $base"
+@@ -108,22 +98,11 @@
+ 		'.[] | select(.head==$b) | "#\(.number)/\(.state)"' "$prs" 2>/dev/null | head -1)
+ 	[ -z "$pr" ] && pr="-"
+ 
+-	# Most recent chat whose transcript operated in this worktree. Match path
+-	# followed by "/" or a quote so glint-482 does not match glint-482-r37.
+-	last="-"; last_ts=0
+-	if [ -d "$transcripts" ]; then
+-		f=$(rg -l -e "${wt}/" -e "${wt}\"" "$transcripts" 2>/dev/null \
+-			| xargs stat "${stat_fmt[@]}" 2>/dev/null | sort -rn | head -1)
+-		if [ -n "$f" ]; then last_ts=$(echo "$f" | awk '{print $1}')
+-			last=$(fmt_day "$last_ts" 2>/dev/null); fi
+-	fi
+-	recent=$([ "$last_ts" -gt 0 ] 2>/dev/null && [ $(( (now - last_ts) / 86400 )) -le 4 ] && echo yes || echo no)
++	last="unknown"
+ 
+ 	case "$dirty" in wip:*) bucket=hold-wip ;; *)
+ 		case "$pr" in */open|*/draft) bucket=hold-open-pr ;; *)
+-			if [ "$recent" = yes ]; then bucket=verify-recent-chat
+-			elif [ "$merged" = YES ] || [ "$pr" != "-" ]; then bucket=safe
+-			else bucket=review; fi ;;
++			bucket=review ;;
+ 		esac ;;
+ 	esac
+ 

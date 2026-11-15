@@ -1,4 +1,4 @@
-import { cp, mkdir, readFile, rm, writeFile } from 'node:fs/promises'
+import { cp, mkdir, readFile, readdir, rm, stat, writeFile } from 'node:fs/promises'
 import { createHash } from 'node:crypto'
 import { resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -107,4 +107,31 @@ for (const harness of ['antigravity', 'opencode']) {
   const defaults = Object.fromEntries(Object.keys(roles).map(name => [name, 'inherit']))
   await writeFile(resolve(dest, 'model-routing.defaults.json'), `${JSON.stringify(defaults, null, 2)}\n`)
 }
+// Amp: a directory plugin. Its index.ts registers the skills as pstack:<name> and
+// hands out amp/adapter.md, so SKILL.md files get no preface. Skills keep upstream's
+// layout, so relative links between skills and to docs/guide resolve.
+const amp = resolve(root, 'amp')
+for (const path of ['skills', 'docs', 'LICENSE']) await rm(resolve(amp, path), { recursive: true, force: true })
+// The statechart test suite is 377 files. Hosted plugins load only with 500 files or fewer.
+const statechartTests = resolve(root, 'upstream/skills/statechart/scripts/test')
+await cp(resolve(root, 'upstream/skills'), resolve(amp, 'skills'), {
+  recursive: true,
+  filter: path => path !== statechartTests && !path.startsWith(`${statechartTests}/`),
+})
+await cp(resolve(root, 'upstream/docs/guide'), resolve(amp, 'docs/guide'), { recursive: true })
+await cp(resolve(root, 'upstream/LICENSE'), resolve(amp, 'LICENSE'))
+let ampFiles = 0
+let ampBytes = 0
+for (const entry of await readdir(amp, { recursive: true, withFileTypes: true })) {
+  if (!entry.isFile()) continue
+  const size = (await stat(resolve(entry.parentPath, entry.name))).size
+  if (size > 10 * 1024 * 1024) throw new Error(`amp/${entry.name} is over 10 MiB. Hosted plugins skip it.`)
+  ampFiles += 1
+  ampBytes += size
+}
+// Amp skips a hosted plugin past these limits, even though the push succeeds.
+if (ampFiles > 500) throw new Error(`amp has ${ampFiles} files. Hosted plugins load only with 500 or fewer.`)
+if (ampBytes > 25 * 1024 * 1024) throw new Error(`amp is ${ampBytes} bytes. Hosted plugins load only up to 25 MiB.`)
+
 console.log(`Built ${names.length} pinned skills plus the harness adapter for Antigravity and OpenCode; ${Object.keys(roles).length} native agents each for Antigravity and OpenCode`)
+console.log(`Built the Amp plugin: ${names.length} skills, ${ampFiles} files, ${(ampBytes / 1024 / 1024).toFixed(1)} MiB`)

@@ -1,8 +1,11 @@
 # Pstack ports
 
 Pstack's 56 engineering skills and 23 playbooks, packaged for
-[Antigravity](antigravity/README.md) and [OpenCode V2](opencode/README.md).
-Each port adds a harness adapter and six native agent roles. No package dependencies
+[Amp](amp/README.md), [Antigravity](antigravity/README.md), and
+[OpenCode V2](opencode/README.md). The Antigravity and OpenCode ports each add a
+harness adapter and six native agent roles. The Amp port is a directory plugin
+with an adapter, hidden principle skills, and a `pstack_agent` tool that routes
+subagent roles to Claude models. No package dependencies
 are needed to build or load these ports. Bundled helper scripts have their own
 runtime dependencies.
 
@@ -10,6 +13,8 @@ runtime dependencies.
 
 Clone this repository, then follow the port's README:
 
+- [Install Amp](amp/README.md): directory plugin, published to an Amp plugins
+  repository with `node scripts/publish-amp.mjs <clone>`.
 - [Install Antigravity](antigravity/README.md): native directory plugin.
 - [Install OpenCode](opencode/README.md): native V2 JavaScript setup/transform plugin.
 
@@ -27,40 +32,41 @@ npm test
 npm run lint
 ```
 
-Edit `antigravity/ADAPTER.md`, `opencode/ADAPTER.md`, or `agents.json`, then rebuild.
+Edit `antigravity/ADAPTER.md`, `opencode/ADAPTER.md`, `agents.json`, or the
+hand-written Amp files (`amp/index.ts`, `amp/adapter.md`, `amp/README.md`,
+`amp/MAINTAINING.md`), then rebuild.
 Do not edit generated skills or generated agent definitions. Tests verify body
 hashes, complete resources, model inheritance, and preservation of user settings.
 
-`upstream/` is the maintained source. The build makes two self-contained bundles,
+`upstream/` is the maintained source. The build makes three self-contained bundles,
 without symlinks or runtime access to `upstream/`. Keeping a single runtime shared
 directory was rejected because copying an Antigravity plugin must not break it.
 The OpenCode plugin registers skills and agents in memory instead of copying
 files into the user's configuration directory. V1 is not supported.
 
-To reimport the pinned version from a reviewed Cursor or Amp pstack checkout:
+To upgrade from upstream, stage the last `cursor/plugins` commit that touched
+`pstack`, then build from the staged copy:
 
 ```sh
-node scripts/build.mjs /absolute/path/to/pstack
+node scripts/stage-upstream.mjs /path/to/cursor-plugins <commit> /tmp/empty-dir
+node scripts/build.mjs /tmp/empty-dir/pstack
 ```
 
-The importer rejects bodies that differ from `upstream-bodies.json`. For an
-upstream upgrade, review the new source first, then deliberately update that
-manifest and the pin below. Review resource and script changes separately.
-The hash manifest verifies skill bodies, not every bundled script.
-
-Use a task-owned staging copy of the upstream `pstack/` directory. Exclude
-`setup-pstack`, `make-bot-ui`, and `docs/harness`. Preserve normalized frontmatter,
-the local `no-comments/comment-sicko.md` resource, and the safety adaptations in
-`poteto-mode/scripts/bootstrap.ts`, `poteto-mode/scripts/worktree-audit.sh`, and
-`statechart/scripts/run.ts`. Merge upstream fixes
-into these files rather than replacing them blindly. Include added skills and
-remove retired skills from both the manifest and `upstream/skills/`.
-Import the reviewed staging copy, update catalog counts, then run the checks above.
+Review the upstream changes first, including resource and script changes,
+because the hash manifest verifies skill bodies, not every bundled script. The
+staging script drops `setup-pstack`, `make-bot-ui`, `docs/harness`, and the
+Benny automations, applies the safety patches in `scripts/patches/`, keeps each
+skill's normalized frontmatter with upstream's new description, and rewrites
+`upstream-bodies.json`. If a patch fails, merge the upstream change into the
+patch rather than copying an old file over the new one. It stops when upstream
+adds or removes a skill, so you can review it and update the counts. Then update
+the pin below and run the checks above. [`amp/MAINTAINING.md`](amp/MAINTAINING.md)
+has the full procedure and the lessons from earlier updates.
 
 Weekly updates run through an Amp schedule in the
 [upstream maintenance thread](https://ampcode.com/threads/T-01a16cdc-2b09-73cf-8c64-b8c44c76673a).
-It reviews upstream changes, updates this checkout, rebuilds both bundles,
-and reports verification. It does not push, publish, or update the published skills.
+It reviews upstream changes, updates this checkout, rebuilds all three bundles,
+and reports verification. It does not push or publish the Amp plugin.
 The local runner must be available for the scheduled run.
 
 ## Sources and limits

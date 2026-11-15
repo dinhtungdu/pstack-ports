@@ -1,0 +1,13 @@
+--- a/skills/statechart/scripts/run.ts
++++ b/skills/statechart/scripts/run.ts
+@@ -199,6 +199,10 @@
+     Promise.all([mise("where", TLC_TOOL), mise("which", "java", "--tool", JAVA_TOOL)]);
+   let found = await where();
+   if (found.some((r) => r.status !== 0)) {
++    if (process.env.PSTACK_ALLOW_INSTALL !== "1")
++      throw new Error(
++        `Cannot find TLC: automatic dependency installation is disabled. Set TLA2TOOLS to the path of tla2tools.jar, and JAVA to a java binary (Java 11 or later). Or approve the downloads and run with PSTACK_ALLOW_INSTALL=1 to run: mise install ${JAVA_TOOL} ${TLC_TOOL}`,
++      );
+     const r = await mise("install", JAVA_TOOL, TLC_TOOL);
+     if (r.status !== 0)
+       throw new Error(
